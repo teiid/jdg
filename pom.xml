@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 	<name>Teiid JDG Connectors</name>
 
-	<version>8.12.1.6_4</version>
+	<version>8.12.11.6_4</version>
 	<description>JDG translator and connectors</description>
 	<properties>
 		<version.bundle.plugin>3.0.1</version.bundle.plugin>
@@ -21,9 +21,10 @@
 		
 		<jbossas-module-root>modules/system/layers/dv</jbossas-module-root>
 		<!-- Overrides to allow the release process to commit: https://jira.codehaus.org/browse/MRELEASE-812 -->
+		<version.org.jboss.as>7.5.5.Final-redhat-3</version.org.jboss.as>
 
 		<version.org.jboss.integration-platform>6.0.0.CR30</version.org.jboss.integration-platform>
-		<version.teiid>8.12.9.6_3</version.teiid>
+		<version.teiid>${project.version}</version.teiid>
 
 		<version.org.hibernate.core>5.0.1.Final-redhat-2</version.org.hibernate.core> <!-- 5.5.1.Final -->
 		<version.org.infinispan.hibernate.search>5.6.0.Final-redhat-1</version.org.infinispan.hibernate.search>
@@ -105,39 +106,6 @@
 			<timezone>+8</timezone>
 		</developer>
 	</developers>
-	<profiles>
-		<profile>
-			<!-- This profile is activated manually, as in "mvn ... -P release ..." -->
-			<id>release</id>
-			<modules>
-				<module>build</module>
-			</modules>
-			<build>
-				<plugins>
-
-				</plugins>
-			</build>
-		</profile>
-
-		<profile>
-			<id>docs</id>
-			<modules>
-				<module>documentation</module>
-			</modules>
-		</profile>
-
-		<profile>
-			<!-- This is to enable faster build for development time. -->
-			<id>dev</id>
-			<properties>
-				<maven.javadoc.skip>true</maven.javadoc.skip>
-				<skipTests>true</skipTests>
-			</properties>
-			<modules>
-				<module>build</module>
-			</modules>
-		</profile>
-	</profiles>
 	<build>
 		<!-- This section defines the default plugin settings inherited by child 
 			projects. -->
@@ -348,6 +316,7 @@
 				<artifactId>translator-object</artifactId>
 				<version>${version.teiid}</version>
 				<type>test-jar</type>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
@@ -360,6 +329,7 @@
 				<artifactId>translator-jdg-hotrod</artifactId>
 				<version>${project.version}</version>
 				<type>test-jar</type>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid</groupId>
