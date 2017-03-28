@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>org.jboss.teiid.connectors</groupId>
+		<artifactId>infinispan</artifactId>
+		<version>9.3.0.Alpha1-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>translator-object</artifactId>
+	<name>Object Translator</name>
+	<description>This is a translator used for reading Map type caches</description>
+	<packaging>bundle</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-common-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-admin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-common-core</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-engine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-engine</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-client</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-metadata</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-metadata</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-engine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

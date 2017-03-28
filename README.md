@@ -3,7 +3,7 @@ Teiid JDG Translator / Connector
 
 This is the repo for the JDG translator / connector to support accessing a JDG Cache as a data source or for materialization.
 
-The is to support JDG 7.1 running in Teiid 8.12.x
+The is to support JDG 7.1 running against Teiid 9.x
 
 ## Useful Links
 - Website - http://teiid.org
@@ -15,10 +15,7 @@ The is to support JDG 7.1 running in Teiid 8.12.x
 
 ## To build Teiid
 
-If running the unit test, must use JDK 1.8+.
-Can use JDK 1.7 if the unit test are not run.  Use -Dmaven.test.skip=true
-
-The included settings_jdg.xml is a settings file that can be used to build against a local JDG maven repository.
+This is built using JDK 1.8+.
 
 
 ## Created Artifacts
