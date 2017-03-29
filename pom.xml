@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 	<name>Teiid JDG Connectors</name>
 
-	<version>9.3.0.Alpha1-SNAPSHOT</version>
+	<version>9.3.0.Alpha3-SNAPSHOT</version>
 	<description>JDG translator and connectors</description>
 	<properties>
 		<version.bundle.plugin>3.0.1</version.bundle.plugin>
