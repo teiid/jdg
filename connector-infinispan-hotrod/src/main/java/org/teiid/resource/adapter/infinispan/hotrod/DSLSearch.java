@@ -75,11 +75,11 @@ import org.teiid.translator.object.SearchType;
  */
 public final class DSLSearch implements SearchType  {
 	
-	private ObjectConnection conn;
+	private InfinispanConnectionImpl conn;
 	
 	
 	public DSLSearch(ObjectConnection connection) {
-		this.conn = connection;
+		this.conn = (InfinispanConnectionImpl) connection;
 	}
 	
 	/** 
@@ -94,14 +94,14 @@ public final class DSLSearch implements SearchType  {
 			Object value,   ExecutionContext executionContext) throws TranslatorException  {	
 		
 		try {
-			return performSearch(columnNameInSource, value, conn);
+			return performSearch(columnNameInSource, value);
 		} finally {
 			conn = null;
 		}
 	}
 	
-	private static Object performSearch(String columnNameInSource,
-			Object value, ObjectConnection conn)  throws TranslatorException  {	
+	private Object performSearch(String columnNameInSource,
+			Object value)  throws TranslatorException  {	
 		
 		@SuppressWarnings("rawtypes")
 		QueryBuilder qb = getQueryBuilder(conn);
@@ -124,7 +124,7 @@ public final class DSLSearch implements SearchType  {
 	public List<Object> performSearch(ObjectVisitor visitor,
 		  ExecutionContext executionContext) throws TranslatorException  {			
 		try {
-			return performSearch(visitor, conn);
+			return performSearch(visitor);
 		} finally {
 			conn = null;
 		}
@@ -132,18 +132,25 @@ public final class DSLSearch implements SearchType  {
 	}
 	
 	public List<Object> getAll() throws TranslatorException  {	
-		QueryBuilder qb = getQueryBuilder(conn);
 		
-		Query query = qb.build();
-		List<Object> results = query.list();
-		if (results == null) {
-               return Collections.emptyList();
+		try {
+			QueryBuilder qb = getQueryBuilder(conn);
+			
+			Query query = qb.build();
+			List<Object> results = query.list();
+			if (results == null) {
+	               return Collections.emptyList();
+			}
+
+			return results;
+
+		} finally {
+			conn = null;
 		}
 
-		return results;
 	}
 	
-	private static List<Object> performSearch(ObjectVisitor visitor, ObjectConnection conn) throws TranslatorException  {			
+	private List<Object> performSearch(ObjectVisitor visitor) throws TranslatorException  {			
 
 		Condition where = visitor.getWhereCriteria();
 		OrderBy orderby = visitor.getOrderBy();		
@@ -193,7 +200,10 @@ public final class DSLSearch implements SearchType  {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private static QueryBuilder getQueryBuilder(ObjectConnection conn) throws TranslatorException {
+	private static QueryBuilder getQueryBuilder(InfinispanConnectionImpl conn) throws TranslatorException {
+		if (! conn.isAlive()) {
+			conn.forceCleanUp();
+		}
 		
 		Class<?> type = conn.getCacheClassType();
 		

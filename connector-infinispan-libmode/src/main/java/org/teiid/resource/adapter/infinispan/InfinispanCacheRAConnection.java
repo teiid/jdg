@@ -179,6 +179,11 @@ public class InfinispanCacheRAConnection extends BasicConnection
 		config = null;
 
 	}
+	
+	@Override
+	public void forceCleanUp() {
+		config = null;
+	}
 
 	@SuppressWarnings("rawtypes")
 	@Override

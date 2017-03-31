@@ -155,7 +155,7 @@
             </config-property>   
             
             <config-property>
-                <description>{$display:"Authentication User Password",$description:"Authentication User Password",$required="false"}</description>
+                <description>{$display:"Authentication User Password",$description:"Authentication User Password",$required="false",$masked:"true"}</description>
                <config-property-name>AuthPassword</config-property-name>
                <config-property-type>java.lang.String</config-property-type>
             </config-property>     
@@ -167,7 +167,7 @@
             </config-property>   
             
             <config-property>
-                <description>{$display:"Authentication User Password",$description:"Administrative User Password",$required="false"}</description>
+                <description>{$display:"Authentication User Password",$description:"Administrative User Password",$required="false",$masked:"true"}</description>
                <config-property-name>AdminPassword</config-property-name>
                <config-property-type>java.lang.String</config-property-type>
             </config-property> 
