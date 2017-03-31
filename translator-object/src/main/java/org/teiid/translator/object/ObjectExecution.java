@@ -307,6 +307,14 @@ public class ObjectExecution extends ObjectBaseExecution implements ResultSetExe
 					"ObjectExecution: number of returned objects is :", objResults.size() ); //$NON-NLS-1$
 			
 			this.objResultsItr = objResults.iterator();
+		} catch (TranslatorException te) {
+			throw te;
+		} catch (RuntimeException re) {
+			// Cache containers, like JDG, can throw runtime exception when there are problems accessing the data in the cache, even though the 
+			// container and cache are available.  So translator needs indicate there was an issue connecting to the cache source.
+			this.connection.forceCleanUp();
+			throw new TranslatorException(ObjectPlugin.Util.gs(ObjectPlugin.Event.TEIID21019));
+
 		} finally {
 			connection.getDDLHandler().setStagingTarget(false);
 		}
@@ -322,7 +330,12 @@ public class ObjectExecution extends ObjectBaseExecution implements ResultSetExe
 			return (List<Object>) cacheResultsIt.next();
 		} 
 		
+		String fkeyColNIS = null;
 		cacheResultsIt = null;
+		if (depth > 0 ) {
+
+			fkeyColNIS = visitor.getForeignKey().getNameInSource();
+		}
 		
 		// process the next object in the search result set
 		while (objResultsItr.hasNext()) {
@@ -330,8 +343,7 @@ public class ObjectExecution extends ObjectBaseExecution implements ResultSetExe
 			final Object o = objResultsItr.next();
 			
 			if (depth > 0) {
-				String fkeyColNIS = visitor.getForeignKey().getNameInSource();
-
+				
 				Method rootClassReadMethod = ClassRegistry.findMethod(this.getClassRegistry().getReadClassMethods(this.connection.getCacheClassType().getName()), fkeyColNIS, this.connection.getCacheClassType().getName());
 
 				Object parentValue = null;
@@ -670,7 +682,9 @@ public class ObjectExecution extends ObjectBaseExecution implements ResultSetExe
 	
 		this.cacheResultsIt = null;
 		
-		this.visitor.cleanUp();
+		if (visitor != null) {
+			this.visitor.cleanUp();
+		}
 		this.visitor = null;
 		
 	}

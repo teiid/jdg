@@ -286,6 +286,17 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
 		if (pkFieldName != null) pkKey = pkFieldName;
 		if (cacheKeyJavaType != null) pkCacheKeyJavaType = getPrimitiveClass(cacheKeyJavaType);
 
+		try {
+			if (usingAnnotations) {
+				cacheSchemaConfigurator = (InfinispanSchemaDefinition) ReflectionHelper.create("org.teiid.resource.adapter.infinispan.hotrod.schema.AnnotationSchema", null, this.getClass().getClassLoader());
+			} else {
+				cacheSchemaConfigurator = (InfinispanSchemaDefinition) ReflectionHelper.create("org.teiid.resource.adapter.infinispan.hotrod.schema.ProtobufSchema", null, this.getClass().getClassLoader());
+			}
+		} catch (TeiidException e) {
+			// TODO Auto-generated catch block
+			throw new ResourceException(e);
+		}
+
 	}
 	
 	public InfinispanSchemaDefinition getCacheSchemaConfigurator() {
@@ -786,18 +797,7 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
 		
 		if (pktype != null) {
 			pkCacheKeyJavaType = loadClass(pktype, loader);
-		}
-				
-		try {
-			if (usingAnnotations) {
-				cacheSchemaConfigurator = (InfinispanSchemaDefinition) ReflectionHelper.create("org.teiid.resource.adapter.infinispan.hotrod.schema.AnnotationSchema", null, loader);
-			} else {
-				cacheSchemaConfigurator = (InfinispanSchemaDefinition) ReflectionHelper.create("org.teiid.resource.adapter.infinispan.hotrod.schema.ProtobufSchema", null, loader);
-			}
-		} catch (TeiidException e) {
-			// TODO Auto-generated catch block
-			throw new ResourceException(e);
-		}			
+		}		
 
 		cacheSchemaConfigurator.initialize(this, methodUtil);
 
@@ -890,7 +890,7 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
 
 		cacheType = null;
 		cl = null;
-		methodUtil.cleanUp();
+		if (methodUtil != null)  methodUtil.cleanUp();
 		cacheNameProxy = null;
 		cacheSchemaConfigurator = null;
 

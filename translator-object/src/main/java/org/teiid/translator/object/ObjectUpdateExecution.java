@@ -132,6 +132,13 @@ public class ObjectUpdateExecution extends ObjectBaseExecution implements Update
 			} else {
 				throw new TranslatorException(ObjectPlugin.Util.gs(ObjectPlugin.Event.TEIID21004, new Object[] {command.getClass().getName()}));
 			}
+		} catch (TranslatorException te) {
+			throw te;
+		} catch (RuntimeException re) {
+			// Cache containers, like JDG, can throw runtime exception when there are problems accessing the data in the cache, even though the 
+			// container and cache are available.  So translator needs indicate there was an issue connecting to the cache source.
+			this.connection.forceCleanUp();
+			throw new TranslatorException(ObjectPlugin.Util.gs(ObjectPlugin.Event.TEIID21019));
 		} finally {
 			this.connection.getDDLHandler().setStagingTarget(false);
 		}

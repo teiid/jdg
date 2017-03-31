@@ -115,6 +115,15 @@ public class InfinispanConnectionImpl extends BasicConnection implements Infinis
 			cacheContainer = null;
 		}
 	}
+	
+	@Override
+	public void forceCleanUp() {
+		if (cacheContainer != null) {
+			cacheContainer.stop();
+		}
+		cacheContainer = null;
+		
+	}
 
 	/** 
 	 * Will return <code>true</true> if the CacheContainer has been started.
