@@ -75,6 +75,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.teiid.connectors</groupId>
+			<artifactId>translator-jdg-hotrod</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>		
+		<dependency>
+			<groupId>org.jboss.teiid.connectors</groupId>
 			<artifactId>translator-object</artifactId>
 			<exclusions>
 				<exclusion>
