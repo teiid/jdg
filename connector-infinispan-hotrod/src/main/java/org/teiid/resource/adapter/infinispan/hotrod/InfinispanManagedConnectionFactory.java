@@ -39,6 +39,8 @@ import org.teiid.resource.spi.BasicManagedConnectionFactory;
 import org.teiid.translator.infinispan.hotrod.ProtobufDataTypeManager;
 import org.teiid.translator.object.CacheNameProxy;
 import org.teiid.translator.object.ClassRegistry;
+import org.teiid.logging.LogConstants;
+import org.teiid.logging.LogManager;
 
 
 public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFactory {
@@ -208,23 +210,34 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
 		if (cacheType == null) {
 			throw new InvalidPropertyException(InfinispanManagedConnectionFactory.UTIL.getString("TEIID25022") );
 		}
+		
 
-		if ((adminUserName != null && adminPassword == null) || (adminUserName == null && adminPassword != null)) {
-			throw new InvalidPropertyException("AdminUserName and AdminPassword must be specfied");
-		} else if (adminUserName != null && adminPassword != null && authApplicationRealm == null) {
-			throw new InvalidPropertyException("AuthApplicationRealm must be specfied");
+		// if 1 is not-null, then all must be specified
+		if (authServerName != null || authSASLMechanism != null || authApplicationRealm != null){
+			if (authServerName == null)	
+				throw new InvalidPropertyException(InfinispanManagedConnectionFactory.UTIL.getString("TEIID25035") );
+			if (authSASLMechanism == null)
+				throw new InvalidPropertyException(InfinispanManagedConnectionFactory.UTIL.getString("TEIID25035") );
+			if (authApplicationRealm == null)
+				throw new InvalidPropertyException(InfinispanManagedConnectionFactory.UTIL.getString("TEIID25035") );
+
+			if (adminUserName == null || adminPassword == null) {
+				throw new InvalidPropertyException(InfinispanManagedConnectionFactory.UTIL.getString("TEIID25036") );
+			}	
+			
+			if ((authUserName != null && authPassword == null) || (authUserName == null && authPassword != null)) {
+				throw new InvalidPropertyException(InfinispanManagedConnectionFactory.UTIL.getString("TEIID25036") );
+			} 
+			
+			if (authUserName == null) {
+				LogManager.logInfo(LogConstants.CTX_CONNECTOR,
+						"=== JDG Resource Adapter - JDG Authentication defaulting to use Subject Credentials ==="); //$NON-NLS-1$
+
+			}		
+		
 		}
 
-		if ((authUserName != null && authPassword == null) || (authUserName == null && authPassword != null)) {
-			throw new InvalidPropertyException("AuthUserName and AuthPassword must be specfied");
-		} else if (authUserName != null && authPassword != null && authApplicationRealm == null) {
-			throw new InvalidPropertyException("AuthApplicationRealm must be specfied");
-		}
 
-		if ((authServerName != null && authSASLMechanism == null)
-				|| (authServerName == null && authSASLMechanism != null)) {
-			throw new InvalidPropertyException("AuthServerName and AuthSASMechanism must be specfied");
-		}
 		
 		if ( (this.trustStoreFileName != null && this.trustStorePassword == null) ||
 				(this.trustStoreFileName == null && this.trustStorePassword != null) ) {
