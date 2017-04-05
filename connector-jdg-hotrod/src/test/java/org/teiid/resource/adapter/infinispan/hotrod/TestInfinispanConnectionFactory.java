@@ -21,17 +21,13 @@
  */
 package org.teiid.resource.adapter.infinispan.hotrod;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 import javax.resource.spi.InvalidPropertyException;
 
 import org.jboss.teiid.jdg_remote.pojo.AllTypes;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.teiid.CommandContext;
@@ -261,5 +257,216 @@ public class TestInfinispanConnectionFactory  {
 		afactory.createConnectionFactory().getConnection();
 		
 	}
+	
+		 /**
+	     * TEIID-4608:   validating JDG authorizations properties
+	     * 
+	     * - 
+	     */
+		@Test
+		public void testValidationAuthentication1() throws Exception {
+	
+			afactory.setProtobufDefinitionFile("allTypes.proto");
+			afactory.setMessageMarshallers("org.jboss.teiid.jdg_remote.pojo.AllTypes:org.jboss.teiid.jdg_remote.pojo.marshaller.AllTypesMarshaller");
+			afactory.setMessageDescriptor("org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setCacheTypeMap("AllTypesCache:org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setHotRodClientPropertiesFile("./src/test/resources/jdg.properties");
+			afactory.setAdminUserName("adminusername");
+			afactory.setAdminPassword("password");
+			afactory.setAuthApplicationRealm("applRealm");
+			afactory.setAuthSASLMechanism("SASL");
+			afactory.setAuthServerName("serverName");
+			afactory.setAuthUserName("username");
+			afactory.setAuthPassword("userpassword");		
+			
+					
+		    afactory.createConnectionFactory().getConnection();
+			
+			assertEquals("adminusername is not the same", "adminusername", afactory.getAdminUserName());
+			assertEquals("admin password is not the same", "password", afactory.getAdminPassword());
+			assertEquals("applRealm is not the same", "applRealm", afactory.getAuthApplicationRealm());
+			assertEquals("SASL is not the same", "SASL", afactory.getAuthSASLMechanism());
+			assertEquals("serverName password is not the same", "serverName", afactory.getAuthServerName());
+			assertEquals("username is not the same", "username", afactory.getAuthUserName());
+			assertEquals("userpassword is not the same", "userpassword", afactory.getAuthPassword());
+		}
+		
+		 /**
+	     * TEIID-4608:   validating JDG authorizations properties
+	     * excludes AuthUsername and Authpassword because they are optional if using Subject credentials
+	     * - 
+	     */
+		@Test
+		public void testValidationAuthentication2() throws Exception {
+	
+			afactory.setProtobufDefinitionFile("allTypes.proto");
+			afactory.setMessageMarshallers("org.jboss.teiid.jdg_remote.pojo.AllTypes:org.jboss.teiid.jdg_remote.pojo.marshaller.AllTypesMarshaller");
+			afactory.setMessageDescriptor("org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setCacheTypeMap("AllTypesCache:org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setHotRodClientPropertiesFile("./src/test/resources/jdg.properties");
+			afactory.setAdminUserName("adminusername");
+			afactory.setAdminPassword("password");
+			afactory.setAuthApplicationRealm("applRealm");
+			afactory.setAuthSASLMechanism("SASL");
+			afactory.setAuthServerName("serverName");	
+			
+					
+		    afactory.createConnectionFactory().getConnection();
+			
+			assertEquals("adminusername is not the same", "adminusername", afactory.getAdminUserName());
+			assertEquals("admin password is not the same", "password", afactory.getAdminPassword());
+			assertEquals("applRealm is not the same", "applRealm", afactory.getAuthApplicationRealm());
+			assertEquals("SASL is not the same", "SASL", afactory.getAuthSASLMechanism());
+			assertEquals("serverName password is not the same", "serverName", afactory.getAuthServerName());
+			assertNull(afactory.getAuthUserName());
+			assertNull(afactory.getAuthPassword());
+		}
+	
+		
+		 /**
+	     * TEIID-4608:   validating JDG authorizations properties
+	     * 
+	     * This throws expected exception because AdminPassword is not provided
+	     * - 
+	     * @throws Exception
+	     */
+		@Test( expected = javax.resource.spi.InvalidPropertyException.class )
+		public void testValidateAdminPasswordProperty() throws Exception {
+	
+			afactory.setProtobufDefinitionFile("allTypes.proto");
+			afactory.setMessageMarshallers("org.jboss.teiid.jdg_remote.pojo.AllTypes:org.jboss.teiid.jdg_remote.pojo.marshaller.AllTypesMarshaller");
+			afactory.setMessageDescriptor("org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setCacheTypeMap("AllTypesCache:org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setHotRodClientPropertiesFile("./src/test/resources/jdg.properties");
+			afactory.setAdminUserName("adminusername");
+	//		afactory.setAdminPassword("password");
+			afactory.setAuthApplicationRealm("applRealm");
+			afactory.setAuthSASLMechanism("SASL");
+			afactory.setAuthServerName("serverName");
+			afactory.setAuthUserName("username");
+			afactory.setAuthPassword("userpassword");		
+			
+					
+		    afactory.createConnectionFactory().getConnection();
+			
+		    assertFalse("test should have failed", true);
+		}
+	
+		 /**
+	     * TEIID-4608:   validating JDG authorizations properties
+	     * 
+	     * This throws expected exception because AdminUserName is not provided
+	     * - 
+	     * @throws Exception
+	     */
+		@Test( expected = javax.resource.spi.InvalidPropertyException.class )
+		public void testValidateAdminUsernameProperty() throws Exception {
+	
+			afactory.setProtobufDefinitionFile("allTypes.proto");
+			afactory.setMessageMarshallers("org.jboss.teiid.jdg_remote.pojo.AllTypes:org.jboss.teiid.jdg_remote.pojo.marshaller.AllTypesMarshaller");
+			afactory.setMessageDescriptor("org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setCacheTypeMap("AllTypesCache:org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setHotRodClientPropertiesFile("./src/test/resources/jdg.properties");
+	//		afactory.setAdminUserName("adminusername");
+			afactory.setAdminPassword("password");
+			afactory.setAuthApplicationRealm("applRealm");
+			afactory.setAuthSASLMechanism("SASL");
+			afactory.setAuthServerName("serverName");
+			afactory.setAuthUserName("username");
+			afactory.setAuthPassword("userpassword");		
+			
+					
+		    afactory.createConnectionFactory().getConnection();
+			
+		    assertFalse("test should have failed", true);
+		}
+		
+		 /**
+	     * TEIID-4608:   validating JDG authorizations properties
+	     * 
+	     * This throws expected exception because AuthUserName is not provided
+	     * - 
+	     * @throws Exception
+	     */
+		@Test( expected = javax.resource.spi.InvalidPropertyException.class )
+		public void testValidateAuthUsernameProperty() throws Exception {
+	
+			afactory.setProtobufDefinitionFile("allTypes.proto");
+			afactory.setMessageMarshallers("org.jboss.teiid.jdg_remote.pojo.AllTypes:org.jboss.teiid.jdg_remote.pojo.marshaller.AllTypesMarshaller");
+			afactory.setMessageDescriptor("org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setCacheTypeMap("AllTypesCache:org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setHotRodClientPropertiesFile("./src/test/resources/jdg.properties");
+			afactory.setAdminUserName("adminusername");
+			afactory.setAdminPassword("password");
+			afactory.setAuthApplicationRealm("applRealm");
+			afactory.setAuthSASLMechanism("SASL");
+			afactory.setAuthServerName("serverName");
+	//		afactory.setAuthUserName("username");
+			afactory.setAuthPassword("userpassword");		
+			
+					
+		    afactory.createConnectionFactory().getConnection();
+			
+		    assertFalse("test should have failed", true);
+		}
+	
+		 /**
+	     * TEIID-4608:   validating JDG authorizations properties
+	     * 
+	     * This throws expected exception because AuthPassword is not provided
+	     * - 
+	     * @throws Exception
+	     */
+		@Test( expected = javax.resource.spi.InvalidPropertyException.class )
+		public void testValidateAuthPasswordProperty() throws Exception {
+	
+			afactory.setProtobufDefinitionFile("allTypes.proto");
+			afactory.setMessageMarshallers("org.jboss.teiid.jdg_remote.pojo.AllTypes:org.jboss.teiid.jdg_remote.pojo.marshaller.AllTypesMarshaller");
+			afactory.setMessageDescriptor("org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setCacheTypeMap("AllTypesCache:org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setHotRodClientPropertiesFile("./src/test/resources/jdg.properties");
+			afactory.setAdminUserName("adminusername");
+			afactory.setAdminPassword("password");
+			afactory.setAuthApplicationRealm("applRealm");
+			afactory.setAuthSASLMechanism("SASL");
+			afactory.setAuthServerName("serverName");
+			afactory.setAuthUserName("username");
+	//		afactory.setAuthPassword("userpassword");		
+			
+					
+		    afactory.createConnectionFactory().getConnection();
+			
+		    assertFalse("test should have failed", true);
+		}
+		
+		 /**
+	     * TEIID-4608:   validating JDG authorizations properties
+	     * 
+	     * This throws expected exception because AuthApplicationRealm is not provided
+	     * - 
+	     * @throws Exception
+	     */
+		@Test( expected = javax.resource.spi.InvalidPropertyException.class )
+		public void testValidateApplicationReamProperty() throws Exception {
+	
+			afactory.setProtobufDefinitionFile("allTypes.proto");
+			afactory.setMessageMarshallers("org.jboss.teiid.jdg_remote.pojo.AllTypes:org.jboss.teiid.jdg_remote.pojo.marshaller.AllTypesMarshaller");
+			afactory.setMessageDescriptor("org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setCacheTypeMap("AllTypesCache:org.jboss.teiid.jdg_remote.pojo.AllTypes");
+			afactory.setHotRodClientPropertiesFile("./src/test/resources/jdg.properties");
+			afactory.setAdminUserName("adminusername");
+			afactory.setAdminPassword("password");
+	//		afactory.setAuthApplicationRealm("applRealm");
+			afactory.setAuthSASLMechanism("SASL");
+			afactory.setAuthServerName("serverName");
+	//		afactory.setAuthUserName("username");
+	//		afactory.setAuthPassword("userpassword");		
+			
+					
+		    afactory.createConnectionFactory().getConnection();
+			
+		    assertFalse("test should have failed", true);
+		}
+	 
 
 }
