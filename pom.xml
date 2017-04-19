@@ -22,7 +22,7 @@
 		<version.org.wildfly>10.0.0.Final</version.org.wildfly>
 		<version.org.wildfly.core>2.0.10.Final</version.org.wildfly.core>
 		<version.org.wildfly.arquillian>1.0.2.Final</version.org.wildfly.arquillian>
-		<version.org.wildfly.build-tools>1.1.6.Final</version.org.wildfly.build-tools>
+		<version.org.wildfly.build-tools>1.1.8.Final</version.org.wildfly.build-tools>
 
 
 		<jbossas-module-root>modules/system/layers/dv</jbossas-module-root>
@@ -150,6 +150,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-rar-plugin</artifactId>
 					<version>2.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.wildfly.build</groupId>
+                	<artifactId>wildfly-server-provisioning-maven-plugin</artifactId>
+                	<version>1.1.8.Final</version>
 				</plugin>
 				<plugin>
 					<groupId>org.wildfly.build</groupId>
@@ -513,5 +518,7 @@
 		<module>translator-infinispan-hotrod</module>
 		<module>connector-infinispan-hotrod</module>
 		<module>feature-pack-infinispan</module>
+		
+		<module>infinispan-kit</module>
 	</modules>
 </project>
