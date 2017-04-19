@@ -182,7 +182,7 @@ public class InfinispanCacheRAConnection extends BasicConnection
 	
 	@Override
 	public void forceCleanUp() {
-		config = null;
+		config.clearCacheManager();
 	}
 
 	@SuppressWarnings("rawtypes")

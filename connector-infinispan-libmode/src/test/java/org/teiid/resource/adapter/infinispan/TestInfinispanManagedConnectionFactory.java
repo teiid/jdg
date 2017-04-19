@@ -132,5 +132,42 @@ public class TestInfinispanManagedConnectionFactory {
     		assertEquals("longValue", conn.getPkField());
     		
     		factory.cleanUp();
+    }    
+    
+    @Test
+    public void testConnectCleanup() throws Exception {
+ 
+		factory.setCacheTypeMap(InfinispanTestHelper.TRADE_CACHE_NAME + ":" + "org.teiid.translator.object.testdata.trades.Trade;longValue:java.lang.Long");
+    	
+    	
+    		ObjectConnection conn = factory.createConnectionFactory().getConnection();
+    		
+    		assertEquals(conn.getCacheName(), InfinispanTestHelper.TRADE_CACHE_NAME);
+    		
+      		
+       		Class<?> clz = conn.getCacheClassType();
+    		
+    		assertEquals(Trade.class, clz);
+    		
+    		Class<?> t = conn.getCacheKeyClassType();
+    		
+    		assertEquals(Long.class, t);
+    		
+    		assertEquals("longValue", conn.getPkField());
+
+    		
+    		conn.forceCleanUp();
+    		
+       		clz = conn.getCacheClassType();
+    		    		
+    		assertEquals(Trade.class, clz);
+    		
+    		Class<?> t2 = conn.getCacheKeyClassType();
+    		
+    		assertEquals(Long.class, t2);
+    		
+    		assertEquals("longValue", conn.getPkField());
+ 		
+    		factory.cleanUp();
     }          
 }

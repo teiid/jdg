@@ -279,14 +279,30 @@ public class InfinispanManagedConnectionFactory extends
 		this.cacheJndiName = jndiName;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public Cache<Object, Object> getCache(String cacheName) throws TranslatorException {
-          if (cacheName == null) {
-      	      	throw new TranslatorException("Program Error: Cache Name is null");
-          } 
-
-		return cacheManager.getCache(cacheName);
+			
+		synchronized(cl) {
+			if (cacheName == null) {
+				throw new TranslatorException("Program Error: Cache Name is null");
+			}
+	
+			if (cacheManager == null) {
+				try {
+					this.createCache();
+				} catch (ResourceException e) {
+					throw new TranslatorException(e);
+				}
+			}
+	
+			return cacheManager.getCache(cacheName);
+		}
 	}	
+	
+	public void clearCacheManager() {
+		synchronized(cl) {
+			this.cacheManager = null;
+		}
+	}
 
 
 	public ClassLoader getClassLoader() {
