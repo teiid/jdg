@@ -29,7 +29,7 @@
         </fileSet>
      	<fileSet>
             <directory>src/main/rar</directory>
-            <outputDirectory>${jbossas-module-root}/org/jboss/teiid/resource-adapter/infinispan/hotrod/main</outputDirectory>
+            <outputDirectory>${jbossas-module-root}/org/jboss/teiid/resource-adapter/jdg/hotrod/main</outputDirectory>
             <filtered>false</filtered>
             <includes>
                 <include>**/META-INF/**</include>
@@ -58,7 +58,7 @@
    
    <dependencySets>
       <dependencySet>
-          <outputDirectory>${jbossas-module-root}/org/jboss/teiid/resource-adapter/infinispan/hotrod/main</outputDirectory>
+          <outputDirectory>${jbossas-module-root}/org/jboss/teiid/resource-adapter/jdg/hotrod/main</outputDirectory>
           <useTransitiveDependencies>false</useTransitiveDependencies>
           <includes>
               <include>org.jboss.teiid.connectors:connector-jdg-hotrod</include>

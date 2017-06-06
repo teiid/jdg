@@ -23,7 +23,7 @@
   
   <dependencySets>
       <dependencySet>
-          <outputDirectory>${jbossas-module-root}/org/jboss/teiid/translator/infinispan/hotrod/main</outputDirectory>
+          <outputDirectory>${jbossas-module-root}/org/jboss/teiid/translator/jdg/hotrod/main</outputDirectory>
           <useTransitiveDependencies>false</useTransitiveDependencies>
           <includes>
               <include>org.jboss.teiid.connectors:translator-jdg-hotrod</include>

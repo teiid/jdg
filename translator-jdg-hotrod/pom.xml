@@ -17,28 +17,6 @@
 		<!-- jdg.slot>jdg-6.4</jdg.slot -->
 	</properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.infinispan</groupId>
-				<artifactId>infinispan-bom</artifactId>
-				<version>${version.org.infinispan.ds}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency> 
-            <dependency>
-              <groupId>org.infinispan</groupId>
-              <artifactId>infinispan-commons</artifactId>
-              <version>${version.org.infinispan.ds}</version>
-            </dependency> 	
-            <dependency>
-                 <groupId>org.infinispan.protostream</groupId>
-                 <artifactId>protostream</artifactId>
-                 <version>${version.org.infinispan.protostream}</version>
-            </dependency>   			
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.jboss.teiid</groupId>
