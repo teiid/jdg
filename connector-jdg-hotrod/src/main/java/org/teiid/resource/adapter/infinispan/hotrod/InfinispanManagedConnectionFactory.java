@@ -746,7 +746,7 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
 	 * @param cacheName
 	 * @throws ResourceException 
 	 */
-	protected void setCacheName(String cacheName) throws ResourceException {
+	public void setCacheName(String cacheName) throws ResourceException {
 		if (getAliasCacheName() != null && getStagingCacheName() != null) {
 			cacheNameProxy = new CacheNameProxy(cacheName, getStagingCacheName(),getAliasCacheName() );
 			

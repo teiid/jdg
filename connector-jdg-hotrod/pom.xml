@@ -9,64 +9,9 @@
 	</parent>
 	<groupId>org.jboss.teiid.connectors</groupId>
 	<artifactId>connector-jdg-hotrod</artifactId>
-	<name>Infinispan Hotrod Connector</name>
+	<name>JDG Hotrod Connector</name>
 	<description>This connector uses Hotrod Client to create a connection to the JDG Cache for accessing</description>
 	<!-- packaging>bundle</packaging-->
-
-	<dependencyManagement>
-		<dependencies>
-            <dependency>
-              <groupId>org.infinispan</groupId>
-              <artifactId>infinispan-client-hotrod</artifactId>
-              <version>${version.org.infinispan.ds}</version>
-            </dependency>   
-            <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-server-hotrod</artifactId>
-                <version>${version.org.infinispan.ds}</version>
-            </dependency>               
-            <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-commons</artifactId>
-                <version>${version.org.infinispan.ds}</version>
-            </dependency> 
-           <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-core</artifactId>
-                <version>${version.org.infinispan.ds}</version>
-            </dependency>            
-             <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-remote-query-client</artifactId>
-                <version>${version.org.infinispan.ds}</version>
-            </dependency>   
-            <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-query-dsl</artifactId>
-                <version>${version.org.infinispan.ds}</version>
-            </dependency>  
-       		<dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-query</artifactId>
-                <version>${version.org.infinispan.ds}</version>
-            </dependency>  
-            <dependency>
-                 <groupId>org.infinispan.protostream</groupId>
-                 <artifactId>protostream</artifactId>
-                 <version>${version.org.infinispan.protostream}</version>
-            </dependency> 
-           <dependency>
-                 <groupId>com.squareup</groupId>
-                 <artifactId>protoparser</artifactId>
-                 <version>${version.com.squareup.protoparser}</version>
-            </dependency>                             		
-           <dependency>
-             	<groupId>org.apache.lucene</groupId>
-             	<artifactId>lucene-core</artifactId>
-             	<version>${version.org.apache.lucene.infinispan}</version>
-         	</dependency>  		
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -106,8 +51,6 @@
 			<artifactId>teiid-common-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!--dependency> <groupId>org.jboss.spec.javax.resource</groupId> <artifactId>jboss-connector-api_1.7_spec</artifactId> 
-			</dependency -->
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-client-hotrod</artifactId>

@@ -1,0 +1,29 @@
+<module xmlns="urn:jboss:module:1.3" name="org.jboss.teiid.resource-adapter.jdg.hotrod" >
+    <properties>
+        <property name="jboss.api" value="private"/>
+    </properties>
+    
+    <resources>
+        <resource-root path="connector-jdg-hotrod-${project.version}.jar" />
+        <resource-root path="."/>
+
+        <!-- Insert resources here -->
+    </resources>
+
+    <dependencies>
+        <module name="javax.api" />
+        <module name="javax.resource.api" />
+        <module name="org.jboss.teiid.common-core" />
+        <module name="org.jboss.teiid.api" />    
+		<module name="org.jboss.teiid.translator.jdg.hotrod" export="true" />
+		
+	<!--  additional JDG dependencies can be found in the translator-infinispan-hotrod module -->
+			
+		<module name="org.infinispan.commons" slot="${jdg.slot}" optional="true" services="import"/>
+		<module name="org.infinispan.client.hotrod" slot="${jdg.slot}" optional="true" services="import"/>
+		<module name="org.infinispan.protostream" slot="${jdg.slot}"  optional="true" services="import" />
+   	  	
+    	<module name="org.jboss.remoting3"  />   
+      
+    </dependencies>
+</module>

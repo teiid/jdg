@@ -7,7 +7,7 @@
 #  Also, didn't create a CLI script at this time, because 'slot' could not be specified in the CLI script and therefore, still required manual editing of the configuration.
 
                 <resource-adapter id="java:/infinispanRemoteHotRod">
-                    <module slot="main" id="org.jboss.teiid.resource-adapter.infinispan.hotrod"/>
+                    <module slot="main" id="org.jboss.teiid.resource-adapter.jdg.hotrod"/>
                     <connection-definitions>
                         <connection-definition class-name="org.teiid.resource.adapter.infinispan.hotrod.InfinispanManagedConnectionFactory" jndi-name="java:/infinispanRemote" enabled="true" use-java-context="true" pool-name="infinispanRemote">
                             <!-- module name to load the cache classes from -->
