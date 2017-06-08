@@ -114,18 +114,14 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
                     // server side
                     RemoteCache<String, String> metadataCache = this.cacheManager
                             .getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
-                    
- //                   Object o = metadataCache.get(protobuf.getIdentifier());
- //                   if (metadataCache != null && metadataCache.get(protobuf.getIdentifier()) == null) {
+                    if (metadataCache != null && metadataCache.get(protobuf.getIdentifier()) == null) {
                         metadataCache.put(protobuf.getIdentifier(), protobuf.getContents());
                         String errors = metadataCache.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
                         if (errors != null) {
                            throw new TranslatorException(InfinispanManagedConnectionFactory.UTIL.getString("proto_error", errors));
                         }
-  //                   }
-                        
-                      this.registeredProtoFiles.add(protobuf.getIdentifier());
-
+                        this.registeredProtoFiles.add(protobuf.getIdentifier());
+                    }
                 }
             } catch(Throwable t) {
                 throw new TranslatorException(t);

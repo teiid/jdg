@@ -155,7 +155,7 @@ public class ProtobufDataManager {
         } else if (contents instanceof String) {
 
         } else if (contents instanceof byte[]) {
-            final byte[] rawContents = (byte[]) contents;
+            byte[] rawContents = (byte[]) contents;
             if (expectedType.isAssignableFrom(String.class)) {
                 try {
                     return new String(rawContents, "UTF-8");
