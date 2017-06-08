@@ -29,22 +29,26 @@
 		<version.org.hibernate.core>5.0.1.Final-redhat-2</version.org.hibernate.core> <!-- 5.5.1.Final -->
 		<version.org.infinispan.hibernate.search>5.6.0.Final-redhat-1</version.org.infinispan.hibernate.search>
 
+<!-- 
+        <version.org.infinispan>9.0.0.Final</version.org.infinispan>
+        <version.io.netty>4.1.5.Final</version.io.netty>
+        <version.org.jboss.logging>3.3.0.Final</version.org.jboss.logging>
+        <version.org.apache.lucene>5.5.0</version.org.apache.lucene>
+        <version.com.squareup>4.0.3</version.com.squareup>
+        <version.org.infinispan.protostream>4.1.0.Alpha1</version.org.infinispan.protostream>
+
+ -->
 
 		<!-- JDG module slot to use -->
 		<jdg.slot>jdg-7.1</jdg.slot>
-		<version.org.infinispan.ds>8.4.0.ER6-redhat-1</version.org.infinispan.ds> <!-- 7.0 = 8.2.4.Final -->
+		<version.org.infinispan.ds>9.0.0.Final</version.org.infinispan.ds> <!-- 8.4.0.ER6-redhat-1 -->
 		<version.org.apache.lucene.infinispan>5.5.1.redhat-1</version.org.apache.lucene.infinispan>	<!-- 5.5.0 -->
-
-		<version.com.squareup.protoparser>3.1.5</version.com.squareup.protoparser>
-		<version.org.infinispan.protostream>4.0.0.Alpha7</version.org.infinispan.protostream> <!-- 3.0.5.Final -->
+		<version.com.squareup.protoparser>4.0.3</version.com.squareup.protoparser>
+		<!-- version.com.squareup.protoparser>3.1.5</version.com.squareup.protoparser-->
+		<version.org.infinispan.protostream>4.1.0.Alpha1</version.org.infinispan.protostream> <!--4.0.0.Alpha7 -->
 
 	</properties>
-	<scm>
-		<connection>scm:git:git://github.com/teiid/jdg.git</connection>
-		<developerConnection>scm:git:git@github.com:teiid/jdg.git</developerConnection>
-		<url>http://github.com/teiid/jdg</url>
-		<tag>HEAD</tag>
-	</scm>
+
 	<licenses>
 		<license>
 			<name>GNU Lesser General Public License</name>
@@ -106,6 +110,60 @@
 			<timezone>+8</timezone>
 		</developer>
 	</developers>
+	<profiles>
+	   <profile>
+      <id>runTest</id>
+      <properties>
+      		<maven.compiler.source>1.8</maven.compiler.source>
+			<maven.compiler.target>1.8</maven.compiler.target>
+      </properties>
+    </profile>   
+ <profile>
+     <id>java8</id>
+     <activation>
+       <jdk>1.8</jdk>
+     </activation>
+       <properties>
+      		<maven.compiler.source>1.8</maven.compiler.source>
+			<maven.compiler.target>1.8</maven.compiler.target>
+      </properties>    
+	   <build>
+	    <plugins>
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>
+	            <version>${version.compiler.plugin}</version>   
+	            <configuration>
+	                <source>1.8</source>
+	                <target>1.8</target>
+	            </configuration>    
+	        </plugin>
+	    </plugins>
+	  </build>
+   </profile>
+<profile>
+     <id>java7</id>
+     <activation>
+       <jdk>1.7</jdk>
+     </activation>
+          <properties>
+      		<maven.test.skip>true</maven.test.skip>
+      </properties>
+		<build>
+		    <plugins>
+		        <plugin>
+		            <groupId>org.apache.maven.plugins</groupId>
+		            <artifactId>maven-compiler-plugin</artifactId>
+		            <version>${version.compiler.plugin}</version>   
+		            <configuration>
+		                <source>${maven.compiler.source}</source>
+		                <target>${maven.compiler.target}</target>
+		            </configuration>    
+		        </plugin>
+		    </plugins>
+		  </build>
+   </profile>   
+	</profiles>
 	<build>
 		<!-- This section defines the default plugin settings inherited by child 
 			projects. -->
@@ -153,7 +211,7 @@
 		</pluginManagement>
 		<plugins>
 			<!-- Specify the compiler options and settings -->
-			<plugin>
+			<!-- plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${version.compiler.plugin}</version>
@@ -163,7 +221,7 @@
 					<showDeprecation>false</showDeprecation>
 					<showWarnings>false</showWarnings>
 				</configuration>
-			</plugin>
+			</plugin-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -246,21 +304,13 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- plugin>
+			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 				<configuration>
     				<excludeDependencies>*;scope=provided|runtime|test</excludeDependencies>
   				</configuration>
-			</plugin-->
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<configuration>
-					<!-- During release:perform, enable the "release" profile -->
-					<releaseProfiles>release</releaseProfiles>
-					<goals>deploy</goals>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -294,16 +344,6 @@
 				<scope>import</scope>
 			</dependency>
 
-			<!-- Import the core parent to get all the managed dependencies from core -->
-			<!--dependency> <groupId>org.wildfly.core</groupId> <artifactId>wildfly-core-parent</artifactId> 
-				<type>pom</type> <version>${version.org.wildfly.core}</version> <scope>import</scope> 
-				</dependency> <dependency> <groupId>org.wildfly</groupId> <artifactId>wildfly-parent</artifactId> 
-				<type>pom</type> <version>${version.org.wildfly}</version> <scope>import</scope> 
-				</dependency -->
-			<!-- Declare all dependency versions and default scopes here, but not 
-				optional. Each module should declare it's direct dependency and possibily 
-				overwrite scope/optional. -->
-
 			<!-- Internal dependencies -->
 
 			<dependency>
@@ -318,19 +358,7 @@
 				<type>test-jar</type>
 				<scope>test</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.jboss.teiid.connectors</groupId>
-				<artifactId>translator-jdg-hotrod</artifactId>
-				<version>${project.version}</version>
-				<type>jar</type>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.teiid.connectors</groupId>
-				<artifactId>translator-jdg-hotrod</artifactId>
-				<version>${project.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
+
 			<dependency>
 				<groupId>org.jboss.teiid</groupId>
 				<artifactId>teiid-common-core</artifactId>
@@ -416,26 +444,47 @@
 
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
-				<artifactId>translator-infinispan-hotrod</artifactId>
+				<artifactId>document-api</artifactId>
 				<version>${version.teiid}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid.connectors</groupId>
+				<artifactId>infinispan-api</artifactId>
+				<version>${version.teiid}</version>
+			</dependency>	
+			<dependency>
+				<groupId>org.jboss.teiid.connectors</groupId>
+				<artifactId>translator-infinispan-hotrod</artifactId>
+				<version>${version.teiid}</version>
+			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-infinispan-hotrod</artifactId>
 				<type>test-jar</type>
 				<version>${version.teiid}</version>
-			</dependency>
+			</dependency>				
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
-				<artifactId>translator-infinispan-libmode</artifactId>
+				<artifactId>translator-jdg-hotrod</artifactId>
 				<version>${version.teiid}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
-				<artifactId>translator-infinispan-libmode</artifactId>
+				<artifactId>translator-jdg-hotrod</artifactId>
 				<type>test-jar</type>
 				<version>${version.teiid}</version>
 			</dependency>
+	        <dependency>
+	            <groupId>org.jboss.teiid.connectors</groupId>
+	            <artifactId>connector-jdg-hotrod</artifactId>
+	            <version>${version.teiid}</version>
+	        </dependency>		
+			<dependency>
+				<groupId>org.jboss.teiid.connectors</groupId>
+				<artifactId>connector-jdg-hotrod</artifactId>
+				<version>${version.teiid}</version>
+				<type>test-jar</type>
+			</dependency>			
 			<dependency>
 				<groupId>org.jboss.modules</groupId>
 				<artifactId>jboss-modules</artifactId>
@@ -453,11 +502,68 @@
 					<version>${version.org.infinispan.hibernate.search}</version>
         	</dependency> 
 
-
+            <dependency>
+              <groupId>org.infinispan</groupId>
+              <artifactId>infinispan-client-hotrod</artifactId>
+              <version>${version.org.infinispan.ds}</version>
+            </dependency>   
+            <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-server-hotrod</artifactId>
+                <version>${version.org.infinispan.ds}</version>
+            </dependency>               
+            <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-commons</artifactId>
+                <version>${version.org.infinispan.ds}</version>
+            </dependency> 
+           <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-core</artifactId>
+                <version>${version.org.infinispan.ds}</version>
+            </dependency>            
+             <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-remote-query-client</artifactId>
+                <version>${version.org.infinispan.ds}</version>
+            </dependency>   
+            <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-query-dsl</artifactId>
+                <version>${version.org.infinispan.ds}</version>
+            </dependency>  
+       		<dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-query</artifactId>
+                <version>${version.org.infinispan.ds}</version>
+            </dependency>  
+            <dependency>
+                 <groupId>org.infinispan.protostream</groupId>
+                 <artifactId>protostream</artifactId>
+                 <version>${version.org.infinispan.protostream}</version>
+            </dependency> 
+           <dependency>
+                 <groupId>com.squareup</groupId>
+                 <artifactId>protoparser</artifactId>
+                 <version>${version.com.squareup.protoparser}</version>
+            </dependency>                             		
+           <dependency>
+             	<groupId>org.apache.lucene</groupId>
+             	<artifactId>lucene-core</artifactId>
+             	<version>${version.org.apache.lucene.infinispan}</version>
+         	</dependency>  		
 		</dependencies>
 	</dependencyManagement>
 	<modules>
 		<module>translator-jdg-hotrod</module>
 		<module>connector-jdg-hotrod</module>
+		<module>document-api</module>
+		<module>infinispan-api</module>
+		<module>translator-infinispan-hotrod</module>
+		<module>connector-infinispan-hotrod</module>
+		<module>infinispan-kit</module>
 	</modules>
+	
+
 </project>
+
