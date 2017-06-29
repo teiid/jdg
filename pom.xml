@@ -562,8 +562,8 @@
 		<module>connector-jdg-hotrod</module>
 		<module>document-api</module>
 		<module>infinispan-api</module>
-		<module>translator-infinispan-hotrod</module>
 		<module>connector-infinispan-hotrod</module>
+		<module>translator-infinispan-hotrod</module>
 		<module>infinispan-kit</module>
 	</modules>
 	
