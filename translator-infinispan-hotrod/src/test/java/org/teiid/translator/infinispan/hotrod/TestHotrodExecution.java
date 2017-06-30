@@ -87,7 +87,7 @@ public class TestHotrodExecution {
             factory.setRemoteServerList("127.0.0.1:11322");
             connectionFactory = factory.createConnectionFactory();
         }
-        return this.connectionFactory.getConnection();
+        return (InfinispanConnection) this.connectionFactory.getConnection();
     }
 
 
