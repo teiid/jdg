@@ -502,5 +502,9 @@ public class ProtobufMetadataProcessor implements MetadataProcessor<InfinispanCo
     static String getParentColumnName(Table table) {
         return table.getProperty(PARENT_COLUMN_NAME, false);
     }
+    
+	static String getCacheName(Table table) {
+		return table.getProperty(CACHE, false);
+	}    
 
 }
