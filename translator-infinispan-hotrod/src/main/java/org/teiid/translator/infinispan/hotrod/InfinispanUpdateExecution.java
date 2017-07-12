@@ -54,18 +54,27 @@ public class InfinispanUpdateExecution implements UpdateExecution {
     private InfinispanConnection connection;
     private ExecutionContext executionContext;
     private RuntimeMetadata metadata;
+    private boolean useAliasCache;
 
     public InfinispanUpdateExecution(Command command, ExecutionContext executionContext, RuntimeMetadata metadata,
-            InfinispanConnection connection) throws TranslatorException {
+    		InfinispanConnection connection, boolean useAliasCache) throws TranslatorException {
         this.command = command;
         this.executionContext = executionContext;
         this.metadata = metadata;
         this.connection = connection;
+        this.useAliasCache = useAliasCache;
     }
 
     @Override
     public void execute() throws TranslatorException {
 
+		if (useAliasCache) {
+			if (useAliasCache) {
+				InfinispanQueryExecution.useModifiedGroups(this.connection, this.executionContext, this.metadata,
+						this.command);
+			}
+		}
+     	
         final InfinispanUpdateVisitor visitor = new InfinispanUpdateVisitor(this.metadata);
         visitor.append(this.command);
 
