@@ -67,12 +67,12 @@
             <artifactId>connector-jdg-hotrod</artifactId>
             <scope>test</scope>
         </dependency>		
-		<dependency>
+		<!--dependency>
 			<groupId>org.jboss.teiid.connectors</groupId>
 			<artifactId>connector-jdg-hotrod</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
-		</dependency>
+		</dependency-->
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-server-hotrod</artifactId>
