@@ -44,8 +44,8 @@
 
 		<!-- JDG module slot to use -->
 		<jdg.slot>jdg-7.1</jdg.slot>
-		<version.org.infinispan.ds>9.0.0.Final</version.org.infinispan.ds> <!-- 8.4.0.ER6-redhat-1 -->
-		<version.org.apache.lucene.infinispan>5.5.1.redhat-1</version.org.apache.lucene.infinispan>	<!-- 5.5.0 -->
+		<version.org.infinispan.ds>8.4.0.Final-redhat-2</version.org.infinispan.ds> <!-- 8.4.0.ER6-redhat-1 -->
+		<version.org.apache.lucene.infinispan>5.5.0</version.org.apache.lucene.infinispan>	<!-- 5.5.0 -->
 		<version.com.squareup.protoparser>4.0.3</version.com.squareup.protoparser>
 		<!-- version.com.squareup.protoparser>3.1.5</version.com.squareup.protoparser-->
 		<version.org.infinispan.protostream>4.1.0.Alpha1</version.org.infinispan.protostream> <!--4.0.0.Alpha7 -->
@@ -113,60 +113,7 @@
 			<timezone>+8</timezone>
 		</developer>
 	</developers>
-	<profiles>
-	   <profile>
-      <id>runTest</id>
-      <properties>
-      		<maven.compiler.source>1.8</maven.compiler.source>
-			<maven.compiler.target>1.8</maven.compiler.target>
-      </properties>
-    </profile>   
- <profile>
-     <id>java8</id>
-     <activation>
-       <jdk>1.8</jdk>
-     </activation>
-       <properties>
-      		<maven.compiler.source>1.8</maven.compiler.source>
-			<maven.compiler.target>1.8</maven.compiler.target>
-      </properties>    
-	   <build>
-	    <plugins>
-	        <plugin>
-	            <groupId>org.apache.maven.plugins</groupId>
-	            <artifactId>maven-compiler-plugin</artifactId>
-	            <version>${version.compiler.plugin}</version>   
-	            <configuration>
-	                <source>1.8</source>
-	                <target>1.8</target>
-	            </configuration>    
-	        </plugin>
-	    </plugins>
-	  </build>
-   </profile>
-<profile>
-     <id>java7</id>
-     <activation>
-       <jdk>1.7</jdk>
-     </activation>
-          <properties>
-      		<maven.test.skip>true</maven.test.skip>
-      </properties>
-		<build>
-		    <plugins>
-		        <plugin>
-		            <groupId>org.apache.maven.plugins</groupId>
-		            <artifactId>maven-compiler-plugin</artifactId>
-		            <version>${version.compiler.plugin}</version>   
-		            <configuration>
-		                <source>${maven.compiler.source}</source>
-		                <target>${maven.compiler.target}</target>
-		            </configuration>    
-		        </plugin>
-		    </plugins>
-		  </build>
-   </profile>   
-	</profiles>
+
 	<build>
 		<!-- This section defines the default plugin settings inherited by child 
 			projects. -->
@@ -214,7 +161,7 @@
 		</pluginManagement>
 		<plugins>
 			<!-- Specify the compiler options and settings -->
-			<!-- plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${version.compiler.plugin}</version>
@@ -224,7 +171,7 @@
 					<showDeprecation>false</showDeprecation>
 					<showWarnings>false</showWarnings>
 				</configuration>
-			</plugin-->
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -558,12 +505,13 @@
 		</dependencies>
 	</dependencyManagement>
 	<modules>
+        <!-- removing the jdg versions from kitting, the 6.4 for the old jdg integration will come from the teiid 6.4 branch -->
 		<module>translator-jdg-hotrod</module>
 		<module>connector-jdg-hotrod</module>
 		<module>document-api</module>
 		<module>infinispan-api</module>
+        <module>translator-infinispan-hotrod</module>
 		<module>connector-infinispan-hotrod</module>
-		<module>translator-infinispan-hotrod</module>
 		<module>infinispan-kit</module>
 	</modules>
 	
