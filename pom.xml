@@ -21,24 +21,20 @@
 		
 		<jbossas-module-root>modules/system/layers/dv</jbossas-module-root>
 		<!-- Overrides to allow the release process to commit: https://jira.codehaus.org/browse/MRELEASE-812 -->
-		<version.org.jboss.as>7.5.5.Final-redhat-3</version.org.jboss.as>
+		<version.org.jboss.as>7.5.17.Final-redhat-2</version.org.jboss.as>
 
 		<version.org.jboss.integration-platform>6.0.0.CR30</version.org.jboss.integration-platform>
 		<version.teiid>8.12.11.6_4</version.teiid>
 
 		<!-- this should match what ${project.version} would be -->
-		<version.teiidjdg>8.12.11.6_4</version.teiidjdg>
+		<!--version.teiidjdg>8.12.11.6_4</version.teiidjdg-->
 
 		<version.org.hibernate.core>5.0.1.Final-redhat-2</version.org.hibernate.core> <!-- 5.5.1.Final -->
 		<version.org.infinispan.hibernate.search>5.6.0.Final-redhat-1</version.org.infinispan.hibernate.search>
 
 <!-- 
-        <version.org.infinispan>9.0.0.Final</version.org.infinispan>
         <version.io.netty>4.1.5.Final</version.io.netty>
         <version.org.jboss.logging>3.3.0.Final</version.org.jboss.logging>
-        <version.org.apache.lucene>5.5.0</version.org.apache.lucene>
-        <version.com.squareup>4.0.3</version.com.squareup>
-        <version.org.infinispan.protostream>4.1.0.Alpha1</version.org.infinispan.protostream>
 
  -->
 
@@ -113,7 +109,61 @@
 			<timezone>+8</timezone>
 		</developer>
 	</developers>
-
+	<profiles>
+	   <profile>
+      <id>runTest</id>
+      <properties>
+      		<maven.compiler.source>1.8</maven.compiler.source>
+			<maven.compiler.target>1.8</maven.compiler.target>
+      </properties>
+    </profile>   
+ <profile>
+     <id>java8</id>
+     <activation>
+       <jdk>1.8</jdk>
+     </activation>
+       <properties>
+      		<maven.compiler.source>1.8</maven.compiler.source>
+			<maven.compiler.target>1.8</maven.compiler.target>
+      </properties>    
+	   <build>
+	    <plugins>
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>
+	            <version>${version.compiler.plugin}</version>   
+	            <configuration>
+	                <source>1.8</source>
+	                <target>1.8</target>
+	            </configuration>    
+	        </plugin>
+	    </plugins>
+	  </build>
+   </profile>
+<profile>
+     <id>java7</id>
+     <activation>
+       <activeByDefault>true</activeByDefault>
+       <!--jdk>1.7</jdk-->
+     </activation>
+          <properties>
+      		<maven.test.skip>true</maven.test.skip>
+      </properties>
+		<build>
+		    <plugins>
+		        <plugin>
+		            <groupId>org.apache.maven.plugins</groupId>
+		            <artifactId>maven-compiler-plugin</artifactId>
+		            <version>${version.compiler.plugin}</version>   
+		            <configuration>
+		                <source>${maven.compiler.source}</source>
+		                <target>${maven.compiler.target}</target>
+		            </configuration>    
+		        </plugin>
+		    </plugins>
+		  </build>
+   </profile>   
+	</profiles>
 	<build>
 		<!-- This section defines the default plugin settings inherited by child 
 			projects. -->
@@ -395,44 +445,44 @@
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>document-api</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>infinispan-api</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-infinispan-hotrod</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-infinispan-hotrod</artifactId>
 				<type>test-jar</type>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>				
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-jdg-hotrod</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-jdg-hotrod</artifactId>
 				<type>test-jar</type>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>
 	        <dependency>
 	            <groupId>org.jboss.teiid.connectors</groupId>
 	            <artifactId>connector-jdg-hotrod</artifactId>
-	            <version>${version.teiidjdg}</version>
+	            <version>${project.version}</version>
 	        </dependency>		
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>connector-jdg-hotrod</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 				<type>test-jar</type>
 			</dependency>			
 			<dependency>
@@ -505,9 +555,9 @@
 		</dependencies>
 	</dependencyManagement>
 	<modules>
-        <!-- removing the jdg versions from kitting, the 6.4 for the old jdg integration will come from the teiid 6.4 branch -->
-		<module>translator-jdg-hotrod</module>
-		<module>connector-jdg-hotrod</module>
+        <!-- no need to build jdg, as the JDV 6.x integration is conming from the resource-adapter/translators on the teiid 64 branch -->
+		<!--module>translator-jdg-hotrod</module>
+		<module>connector-jdg-hotrod</module-->
 		<module>document-api</module>
 		<module>infinispan-api</module>
         <module>translator-infinispan-hotrod</module>

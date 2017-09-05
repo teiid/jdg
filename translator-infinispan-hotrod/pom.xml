@@ -70,7 +70,7 @@
 		<!--dependency>
 			<groupId>org.jboss.teiid.connectors</groupId>
 			<artifactId>connector-jdg-hotrod</artifactId>
-			<type>test-jar</type>
+            <type>jar</type>
 			<scope>test</scope>
 		</dependency-->
         <dependency>

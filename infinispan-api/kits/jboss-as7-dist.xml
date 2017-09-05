@@ -36,7 +36,7 @@
               <include>com.squareup:protoparser</include>
           </includes>
       </dependencySet>  
-      <dependencySet>
+      <!--dependencySet>
           <outputDirectory>${jbossas-module-root}/org/infinispan/client/hotrod/teiid</outputDirectory>
           <useTransitiveDependencies>false</useTransitiveDependencies>
           <includes>
@@ -63,15 +63,15 @@
           <includes>
               <include>org.infinispan.protostream:protostream</include>
           </includes>
-      </dependencySet> 
+      </dependencySet--> 
 
-      <dependencySet>
+      <!--dependencySet>
           <outputDirectory>${jbossas-module-root}/org/infinispan/commons/teiid</outputDirectory>
           <useTransitiveDependencies>false</useTransitiveDependencies>
           <includes>
               <include>org.infinispan:infinispan-commons</include>
           </includes>
-      </dependencySet> 
+      </dependencySet--> 
   </dependencySets>
 
 </assembly>
