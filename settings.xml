@@ -4,6 +4,77 @@
 http://maven.apache.org/xsd/settings-1.0.0.xsd">
   <profiles>
     <profile>
+      <id>jdv-profile</id>
+      <repositories>
+        <repository>
+          <id>jdv-brew-repo</id>
+          <name>JBoss Public Maven Repository Group</name>
+          <url>http://download.eng.bos.redhat.com/brewroot/repos/jb-dv-6.4-build/latest/maven</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>jdv-brew-repo</id>
+          <name>JBoss Public Maven Repository Group</name>
+          <url>http://download.eng.bos.redhat.com/brewroot/repos/jb-dv-6.4-build/latest/maven</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>jdg-repository</id>
+      <repositories>
+         <repository>
+               <id>jboss-datagrid-repository</id>
+               <name>JBoss Data Grid Maven Repository</name>
+               <url>file:///home/vhalbert/RedHat/platforms/jdg/7.1/jboss-datagrid-7.1.0-maven-repository/maven-repository/</url>
+               <layout>default</layout>
+               <releases>
+                  <enabled>true</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </releases>
+               <snapshots>
+                  <enabled>false</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </snapshots>
+            </repository>
+      </repositories>
+      <pluginRepositories>
+           <pluginRepository>
+               <id>jboss-datagrid-repository-group</id>
+               <name>JBoss Data Grid Maven Repository</name>
+               <url>file:///home/vhalbert/RedHat/platforms/jdg/7.1/jboss-datagrid-7.1.0-maven-repository/maven-repository/</url>
+               <layout>default</layout>
+               <releases>
+                  <enabled>true</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </releases>
+               <snapshots>
+                  <enabled>false</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </snapshots>
+            </pluginRepository>
+         </pluginRepositories>
+    </profile>
+   
+    <profile>
       <id>jboss-public-repository</id>
       <repositories>
         <repository>
@@ -57,7 +128,6 @@ http://maven.apache.org/xsd/settings-1.0.0.xsd">
         </repository>
       </repositories> 
     </profile>    
-    
     <profile>
       <id>jboss-techpreview</id>
       <repositories>
@@ -93,38 +163,17 @@ http://maven.apache.org/xsd/settings-1.0.0.xsd">
           </snapshots>
         </repository>
       </repositories>
-    </profile>       
-                    
-    <profile>
-      <id>thirdparty-uploads</id>
-      <repositories>
-        <repository>
-          <id>thirdparty-uploads</id>
-          <name>JBoss Third Party Uploads</name>
-          <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-uploads/</url>
-          <layout>default</layout>
-          <releases>
-            <enabled>true</enabled>
-            <updatePolicy>never</updatePolicy>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
-                        
+    </profile>                     
   </profiles>
-  
 
   <activeProfiles>
+      
+    <activeProfile>jdv-profile</activeProfile>
+    <activeProfile>jdg-repository</activeProfile>
     <activeProfile>jboss-public-repository</activeProfile>
     <activeProfile>jboss-developer-repository</activeProfile>
-    <activeProfile>thirdparty-uploads</activeProfile>
-    
     <activeProfile>jboss-techpreview</activeProfile>
-    <activeProfile>jboss-earlyaccess</activeProfile>    
-    
+    <activeProfile>jboss-earlyaccess</activeProfile>
   </activeProfiles>
 
 </settings>
