@@ -19,16 +19,13 @@
         <module name="com.squareup" optional="true" /> 				
         
    <!--   
-   To use with JDG EAP HotRod Module Kit
+        To use with JDG EAP HotRod Module Kit -->
 		<module name="org.infinispan.commons" slot="${jdg.slot}" optional="true" services="import"/>
 		<module name="org.infinispan.client.hotrod" slot="${jdg.slot}" optional="true" services="import"/>
 		<module name="org.infinispan.protostream" slot="${jdg.slot}"  optional="true" services="import" />
    	  	
-    	<module name="org.jboss.remoting3"  />   
+    	<!--module name="org.jboss.remoting3"  />   
     -->      
     
-    <!--  the following dependencies are used when the jdg jars are included in the build  -->  
-        <module name="org.infinispan.client.hotrod" slot="teiid"/>
-        <module name="org.infinispan.commons" slot="teiid"/>
     </dependencies>
 </module>
