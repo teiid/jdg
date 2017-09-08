@@ -9,7 +9,7 @@ http://maven.apache.org/xsd/settings-1.0.0.xsd">
          <repository>
                <id>jboss-datagrid-repository</id>
                <name>JBoss Data Grid Maven Repository</name>
-               <url>file:///home/vhalbert/RedHat/platforms/jdg/7.1/jboss-datagrid-7.1.0-maven-repository/maven-repository/</url>
+               <url>http://download.eng.bos.redhat.com/brewroot/repos/jb-edg-6-rhel-6-build/latest/maven/</url>
                <layout>default</layout>
                <releases>
                   <enabled>true</enabled>
@@ -25,7 +25,7 @@ http://maven.apache.org/xsd/settings-1.0.0.xsd">
            <pluginRepository>
                <id>jboss-datagrid-repository-group</id>
                <name>JBoss Data Grid Maven Repository</name>
-               <url>file:///home/vhalbert/RedHat/platforms/jdg/7.1/jboss-datagrid-7.1.0-maven-repository/maven-repository/</url>
+               <url>http://download.eng.bos.redhat.com/brewroot/repos/jb-edg-6-rhel-6-build/latest/maven/</url>
                <layout>default</layout>
                <releases>
                   <enabled>true</enabled>
@@ -92,7 +92,24 @@ http://maven.apache.org/xsd/settings-1.0.0.xsd">
         </repository>
       </repositories> 
     </profile>    
-     
+     <profile>
+      <id>jbip6</id>
+      <repositories>
+        <repository>
+          <id>jbip6</id>
+          <name>JBoss IP 6</name>
+          <url>http://download.devel.redhat.com/brewroot/repos/jb-ip-6.1-build/latest/maven/</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>        
     <profile>
       <id>jboss-techpreview</id>
       <repositories>
@@ -155,7 +172,7 @@ http://maven.apache.org/xsd/settings-1.0.0.xsd">
 
   <activeProfiles>
 	<activeProfile>jdg-repository</activeProfile>  
-
+    <activeProfile>jbip6</activeProfile>
     <activeProfile>jboss-techpreview</activeProfile>
     <activeProfile>jboss-public-repository</activeProfile>
     <activeProfile>jboss-developer-repository</activeProfile>
