@@ -21,7 +21,7 @@
 		
 		<jbossas-module-root>modules/system/layers/dv</jbossas-module-root>
 		<!-- Overrides to allow the release process to commit: https://jira.codehaus.org/browse/MRELEASE-812 -->
-		<version.org.jboss.as>7.5.17.Final-redhat-2</version.org.jboss.as>
+		<version.org.jboss.as>7.5.17.Final-redhat-4</version.org.jboss.as>
 
 		<version.org.jboss.integration-platform>6.0.0.CR30</version.org.jboss.integration-platform>
 		<version.teiid>8.12.11.6_4</version.teiid>
@@ -485,11 +485,11 @@
 				<version>${project.version}</version>
 				<type>test-jar</type>
 			</dependency>			
-			<dependency>
+			<!--dependency>
 				<groupId>org.jboss.modules</groupId>
 				<artifactId>jboss-modules</artifactId>
 				<scope>provided</scope>
-			</dependency>
+			</dependency-->
 
 			<dependency> 
 					<groupId>org.hibernate.common</groupId> 
