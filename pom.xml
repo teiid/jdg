@@ -556,8 +556,8 @@
 	</dependencyManagement>
 	<modules>
         <!-- no need to build jdg, as the JDV 6.x integration is conming from the resource-adapter/translators on the teiid 64 branch -->
-		<!--module>translator-jdg-hotrod</module>
-		<module>connector-jdg-hotrod</module-->
+		<module>translator-jdg-hotrod</module>
+		<module>connector-jdg-hotrod</module>
 		<module>document-api</module>
 		<module>infinispan-api</module>
         <module>translator-infinispan-hotrod</module>
