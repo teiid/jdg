@@ -22,8 +22,11 @@
 package org.teiid.infinispan.api;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -39,11 +42,15 @@ import java.util.HashMap;
 import org.infinispan.protostream.descriptors.Type;
 import org.teiid.core.TeiidRuntimeException;
 import org.teiid.core.types.BlobImpl;
+import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobImpl;
+import org.teiid.core.types.ClobType;
 import org.teiid.core.types.DataTypeManager;
+import org.teiid.core.types.GeometryType;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.types.TransformationException;
+import org.teiid.core.types.XMLType;
 import org.teiid.core.types.basic.ObjectToAnyTransform;
 import org.teiid.core.util.ObjectConverterUtil;
 
@@ -54,8 +61,6 @@ public class ProtobufDataManager {
 
     private static HashMap<ScalarType, String> protoTypes = new HashMap<ScalarType, String>();
     private static HashMap<String, ScalarType> teiidTypes = new HashMap<String, ScalarType>();
-    private static HashMap<String, Type> protobufTypes = new HashMap<String, Type>();
-
 
     static {
         protoTypes.put(ScalarType.STRING, DataTypeManager.DefaultDataTypes.STRING);
@@ -86,10 +91,11 @@ public class ProtobufDataManager {
         teiidTypes.put(DataTypeManager.DefaultDataTypes.LONG, ScalarType.INT64);
         teiidTypes.put(DataTypeManager.DefaultDataTypes.FLOAT, ScalarType.FLOAT);
         teiidTypes.put(DataTypeManager.DefaultDataTypes.DOUBLE, ScalarType.DOUBLE);
-        teiidTypes.put(DataTypeManager.DefaultDataTypes.BIG_DECIMAL, ScalarType.BYTES);
-        teiidTypes.put(DataTypeManager.DefaultDataTypes.DATE, ScalarType.STRING);
-        teiidTypes.put(DataTypeManager.DefaultDataTypes.TIME, ScalarType.STRING);
-        teiidTypes.put(DataTypeManager.DefaultDataTypes.TIMESTAMP, ScalarType.STRING);
+        teiidTypes.put(DataTypeManager.DefaultDataTypes.BIG_DECIMAL, ScalarType.STRING);
+        teiidTypes.put(DataTypeManager.DefaultDataTypes.BIG_INTEGER, ScalarType.STRING);
+        teiidTypes.put(DataTypeManager.DefaultDataTypes.DATE, ScalarType.INT64);
+        teiidTypes.put(DataTypeManager.DefaultDataTypes.TIME, ScalarType.INT64);
+        teiidTypes.put(DataTypeManager.DefaultDataTypes.TIMESTAMP, ScalarType.INT64);
         teiidTypes.put(DataTypeManager.DefaultDataTypes.BLOB, ScalarType.BYTES);
         teiidTypes.put(DataTypeManager.DefaultDataTypes.CLOB, ScalarType.BYTES);
         teiidTypes.put(DataTypeManager.DefaultDataTypes.XML, ScalarType.BYTES);
@@ -97,23 +103,6 @@ public class ProtobufDataManager {
         // will fail for most values
         teiidTypes.put(DataTypeManager.DefaultDataTypes.OBJECT, ScalarType.BYTES);
         teiidTypes.put(DataTypeManager.DefaultDataTypes.GEOMETRY, ScalarType.BYTES);
-        
-        protobufTypes.put("bool", Type.BOOL);
-        protobufTypes.put("bytes", Type.BYTES);
-        protobufTypes.put("double", Type.DOUBLE);
-        protobufTypes.put("float", Type.FLOAT);
-        protobufTypes.put("fixed32", Type.FIXED32);
-        protobufTypes.put("fixed64", Type.FIXED64);
-        protobufTypes.put("int32", Type.INT32);
-        protobufTypes.put("int64", Type.INT64);
-        protobufTypes.put("sfixed32", Type.SFIXED32);
-        protobufTypes.put("sfixed64", Type.SFIXED64);
-        protobufTypes.put("sint32", Type.SINT32);
-        protobufTypes.put("sint64", Type.SINT64);
-        protobufTypes.put("string", Type.STRING);
-        protobufTypes.put("uint32", Type.UINT32);
-        protobufTypes.put("uint64", Type.UINT64);
-    
     }
 
     public static String teiidType(DataType protoType, boolean array, boolean isEnum) {
@@ -153,35 +142,42 @@ public class ProtobufDataManager {
                 return new Time(rawContents);
             }
         } else if (contents instanceof String) {
-
+	        if (expectedType.isAssignableFrom(BigInteger.class)) {
+	            return new BigInteger((String)contents);
+	        } else if (expectedType.isAssignableFrom(BigDecimal.class)) {
+	            return new BigDecimal((String)contents);
+	        }
         } else if (contents instanceof byte[]) {
-            final byte[] rawContents = (byte[]) contents;
+            byte[] rawContents = (byte[]) contents;
             if (expectedType.isAssignableFrom(String.class)) {
                 try {
                     return new String(rawContents, "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     throw new IOException(e);
                 }
-            } else if (expectedType.isAssignableFrom(BigInteger.class)) {
-                return new BigInteger(rawContents);
-            } else if (expectedType.isAssignableFrom(BigDecimal.class)) {
-                return new BigDecimal(new BigInteger(rawContents));
-            } else if (expectedType.isAssignableFrom(Clob.class)) {
+            } else if (expectedType.isAssignableFrom(ClobType.class)) {
                 return new ClobImpl(new InputStreamFactory() {
                     @Override
                     public InputStream getInputStream() throws IOException {
                         return new ByteArrayInputStream(rawContents);
                     }
                 }, -1);
-            } else if (expectedType.isAssignableFrom(Blob.class)) {
+            } else if (expectedType.isAssignableFrom(BlobType.class)) {
                 return new BlobImpl(new InputStreamFactory() {
                     @Override
                     public InputStream getInputStream() throws IOException {
                         return new ByteArrayInputStream(rawContents);
                     }
                 });
-            } else if (expectedType.isAssignableFrom(SQLXML.class)) {
+            } else if (expectedType.isAssignableFrom(XMLType.class)) {
                 return new SQLXMLImpl(rawContents);
+            } else if (expectedType.isAssignableFrom(GeometryType.class)) {
+                return new GeometryType(new BlobImpl(new InputStreamFactory() {
+                    @Override
+                    public InputStream getInputStream() throws IOException {
+                        return new ByteArrayInputStream(rawContents);
+                    }
+                }));
             }
         } else {
             try {
@@ -198,22 +194,22 @@ public class ProtobufDataManager {
             return expectedType.cast(contents);
         }
 
+        if (contents instanceof Short && expectedType.isAssignableFrom(Integer.class)) {
+        	return expectedType.cast(((Short)contents).intValue());
+        }
+        else if (contents instanceof Byte && expectedType.isAssignableFrom(Integer.class)) {
+        	return expectedType.cast(((Byte)contents).intValue());
+        }
+        else if (contents instanceof Character && expectedType.isAssignableFrom(String.class)) {
+        	return expectedType.cast(((Character)contents).toString());
+        }        
         // date/time
-        if (contents instanceof Date && expectedType.isAssignableFrom(Long.class)) {
+        else if (contents instanceof Date && expectedType.isAssignableFrom(Long.class)) {
             return expectedType.cast(((Date) contents).getTime());
         } else if (contents instanceof Timestamp && expectedType.isAssignableFrom(Long.class)) {
             return expectedType.cast(((Timestamp) contents).getTime());
         } else if (contents instanceof Time && expectedType.isAssignableFrom(Long.class)) {
             return expectedType.cast(((Time) contents).getTime());
-        } else if (contents instanceof Date && expectedType.isAssignableFrom(byte[].class)) {
-            long l = ((Date) contents).getTime();
-            return expectedType.cast(java.nio.ByteBuffer.allocate(Long.SIZE / 8).putLong(l).array());
-        } else if (contents instanceof Timestamp && expectedType.isAssignableFrom(byte[].class)) {
-            long l = ((Timestamp) contents).getTime();
-            return expectedType.cast(java.nio.ByteBuffer.allocate(Long.SIZE / 8).putLong(l).array());
-        } else if (contents instanceof Time && expectedType.isAssignableFrom(byte[].class)) {
-            long l = ((Time) contents).getTime();
-            return expectedType.cast(java.nio.ByteBuffer.allocate(Long.SIZE / 8).putLong(l).array());
         } else if (contents instanceof String && expectedType.isAssignableFrom(byte[].class)) {
             return expectedType.cast(((String)contents).getBytes("UTF-8"));
         } else if (contents instanceof Clob && expectedType.isAssignableFrom(byte[].class)) {
@@ -240,39 +236,99 @@ public class ProtobufDataManager {
             return expectedType.cast(((BigInteger) contents).toString());
         } else if (contents instanceof BigDecimal && expectedType.isAssignableFrom(String.class)) {
             return expectedType.cast(((BigDecimal) contents).toString());
-        } else if (contents instanceof BigInteger && expectedType.isAssignableFrom(byte[].class)) {
-            return expectedType.cast(((BigInteger) contents).toByteArray());
-        } else if (contents instanceof BigDecimal && expectedType.isAssignableFrom(byte[].class)) {
-            return expectedType.cast(((BigDecimal) contents).toBigInteger().toByteArray());
+        } else if (contents instanceof Serializable && expectedType.isAssignableFrom(byte[].class)) {
+        	ByteArrayOutputStream out = new ByteArrayOutputStream();
+        	ObjectOutputStream oos = new ObjectOutputStream(out);
+        	oos.writeObject(contents);
+        	oos.flush();
+        	return expectedType.cast(out.toByteArray());
         }
         throw new IOException("unknown type to write:" + contents.getClass());
     }
 
     public static Type parseProtobufType(String name) {
-    	   	
-    	Type t = protobufTypes.get(name);
- 
-    	if (t == null) {
+        switch (name) {
+        case "bool":
+            return Type.BOOL;
+        case "bytes":
+            return Type.BYTES;
+        case "double":
+            return Type.DOUBLE;
+        case "float":
+            return Type.FLOAT;
+        case "fixed32":
+            return Type.FIXED32;
+        case "fixed64":
+            return Type.FIXED64;
+        case "int32":
+            return Type.INT32;
+        case "int64":
+            return Type.INT64;
+        case "sfixed32":
+            return Type.SFIXED32;
+        case "sfixed64":
+            return Type.SFIXED64;
+        case "sint32":
+            return Type.SINT32;
+        case "sint64":
+            return Type.SINT64;
+        case "string":
+            return Type.STRING;
+        case "uint32":
+            return Type.UINT32;
+        case "uint64":
+            return Type.UINT64;
+        default:
             throw new TeiidRuntimeException("unrecognised type in metadata :" + name);
         }
-    	return t;
     }
 
     public static Type getCompatibleProtobufType(Class<?> type) {
-        if (type.isAssignableFrom(String.class) || type.isAssignableFrom(Character.class)) {
+		if (String.class.isAssignableFrom(type) || Character.class.isAssignableFrom(type)
+				|| BigInteger.class.isAssignableFrom(type) || BigDecimal.class.isAssignableFrom(type)) {
             return Type.STRING;
-        } else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(Short.class)
-                || type.isAssignableFrom(Byte.class)) {
+        } else if (Integer.class.isAssignableFrom(type) || Short.class.isAssignableFrom(type)
+                || Byte.class.isAssignableFrom(type)) {
             return Type.INT32;
-        } else if (type.isAssignableFrom(Long.class)) {
+		} else if (Long.class.isAssignableFrom(type) || Time.class.isAssignableFrom(type)
+				|| Date.class.isAssignableFrom(type) || Timestamp.class.isAssignableFrom(type)) {
             return Type.INT64;
-        } else if (type.isAssignableFrom(Boolean.class)) {
+        } else if (Boolean.class.isAssignableFrom(type)) {
             return Type.BOOL;
-        } else if (type.isAssignableFrom(Float.class)) {
+        } else if (Float.class.isAssignableFrom(type)) {
             return Type.FLOAT;
-        } else if (type.isAssignableFrom(Double.class)) {
+        } else if (Double.class.isAssignableFrom(type)) {
             return Type.DOUBLE;
         }
         return Type.BYTES;
     }
+    
+    public static boolean shouldPreserveType(String ispnType, String teiidType) {
+    	if (teiidType.endsWith("[]")) {
+    		teiidType = teiidType.substring(0, teiidType.length()-2);
+    	}
+		if (ispnType.equalsIgnoreCase(Type.STRING.name())
+				&& teiidType.equalsIgnoreCase(DataTypeManager.DefaultDataTypes.STRING)) {
+    		return false;
+    	} else if (ispnType.equalsIgnoreCase(Type.INT32.name())
+				&& teiidType.equalsIgnoreCase(DataTypeManager.DefaultDataTypes.INTEGER)) {
+    		return false;
+    	} else if (ispnType.equalsIgnoreCase(Type.INT64.name())
+				&& teiidType.equalsIgnoreCase(DataTypeManager.DefaultDataTypes.LONG)) {
+    		return false;
+    	} else if (ispnType.equalsIgnoreCase(Type.BOOL.name())
+				&& teiidType.equalsIgnoreCase(DataTypeManager.DefaultDataTypes.BOOLEAN)) {
+    		return false;
+    	} else if (ispnType.equalsIgnoreCase(Type.FLOAT.name())
+				&& teiidType.equalsIgnoreCase(DataTypeManager.DefaultDataTypes.FLOAT)) {
+    		return false;
+    	} else if (ispnType.equalsIgnoreCase(Type.DOUBLE.name())
+				&& teiidType.equalsIgnoreCase(DataTypeManager.DefaultDataTypes.DOUBLE)) {
+    		return false;
+    	} else if (ispnType.equalsIgnoreCase(Type.BYTES.name())
+				&& teiidType.equalsIgnoreCase(DataTypeManager.DefaultDataTypes.VARBINARY)) {
+    		return false;
+    	}
+        return true;
+    }    
 }

@@ -25,14 +25,27 @@ import static org.teiid.language.SQLConstants.Reserved.HAVING;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.teiid.language.*;
+import org.teiid.language.AggregateFunction;
+import org.teiid.language.ColumnReference;
+import org.teiid.language.Comparison;
 import org.teiid.language.Comparison.Operator;
+import org.teiid.language.Condition;
+import org.teiid.language.DerivedColumn;
+import org.teiid.language.Expression;
+import org.teiid.language.Function;
+import org.teiid.language.Join;
 import org.teiid.language.Join.JoinType;
+import org.teiid.language.Limit;
+import org.teiid.language.NamedTable;
+import org.teiid.language.SQLConstants;
 import org.teiid.language.SQLConstants.Tokens;
+import org.teiid.language.Select;
 import org.teiid.language.visitor.SQLStringVisitor;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.KeyRecord;
@@ -53,7 +66,7 @@ public class IckleConversionVisitor extends SQLStringVisitor {
     protected boolean avoidProjection = false;
     private DocumentNode rootNode;
     private DocumentNode joinedNode;
-    private List<String> projectedDocumentAttributes = new ArrayList<String>();
+    private LinkedHashMap<String, Class<?>> projectedDocumentAttributes = new LinkedHashMap<>();
     private AtomicInteger aliasCounter = new AtomicInteger();
     protected boolean nested;
 
@@ -290,7 +303,9 @@ public class IckleConversionVisitor extends SQLStringVisitor {
                 nested = true;
             }
             try {
-                this.projectedDocumentAttributes.add(MarshallerBuilder.getDocumentAttributeName(column, nested, this.metadata));
+				this.projectedDocumentAttributes.put(
+						MarshallerBuilder.getDocumentAttributeName(column, nested, this.metadata),
+						column.getJavaType());
             } catch (TranslatorException e) {
                 this.exceptions.add(e);
             }
@@ -394,7 +409,7 @@ public class IckleConversionVisitor extends SQLStringVisitor {
         return false;
     }
 
-    public List<String> getProjectedDocumentAttributes() throws TranslatorException {
+    public Map<String, Class<?>> getProjectedDocumentAttributes() throws TranslatorException {
         return projectedDocumentAttributes;
     }
 
