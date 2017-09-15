@@ -9,34 +9,24 @@
   <artifactId>infinispan-kit</artifactId>
   <name>Infinispan Kit</name>
   <description>Infinispan Connectors Kit</description>
-<!-- 
-	<profiles>
-		<profile>
-			<id>kit</id>
-	   <build>
-	    <plugins>
-	        <plugin>
-               <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>jboss-dist.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>create-assemblies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-	        </plugin>
-	    </plugins>
-	  </build>
-		</profile>
-	</profiles> 
- -->
+	<dependencies>
+		<dependency>
+			<groupId>org.jboss.teiid.connectors</groupId>
+			<artifactId>translator-infinispan-hotrod</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid.connectors</groupId>
+			<artifactId>connector-infinispan-hotrod</artifactId>
+		</dependency>		
+		<dependency>
+			<groupId>org.jboss.teiid.connectors</groupId>
+			<artifactId>document-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid.connectors</groupId>
+			<artifactId>infinispan-api</artifactId>
+		</dependency>
+	</dependencies>
  	<build>
  	    <plugins>
 	        <plugin>

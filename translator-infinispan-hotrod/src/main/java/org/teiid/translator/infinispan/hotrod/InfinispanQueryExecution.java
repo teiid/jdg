@@ -23,6 +23,7 @@ package org.teiid.translator.infinispan.hotrod;
 
 import java.util.List;
 import java.util.Collection;
+import java.io.IOException;
 
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -97,8 +98,9 @@ public class InfinispanQueryExecution implements ResultSetExecution {
 
             // if the message in defined in different cache than the default, switch it out now.
             RemoteCache<Object, Object> cache =  getCache(table, connection);
-            results = new InfinispanResponse(cache, queryStr, this.executionContext.getBatchSize(), visitor.getRowLimit(),
-                    visitor.getRowOffset(), visitor.getProjectedDocumentAttributes(), visitor.getDocumentNode());
+			results = new InfinispanResponse(cache, queryStr, this.executionContext.getBatchSize(),
+					visitor.getRowLimit(), visitor.getRowOffset(), visitor.getProjectedDocumentAttributes(),
+					visitor.getDocumentNode());
         } finally {
             this.connection.unRegisterMarshaller(this.marshaller);
         }
@@ -134,7 +136,10 @@ public class InfinispanQueryExecution implements ResultSetExecution {
         try {
             this.connection.registerMarshaller(this.marshaller);
             return results.getNextRow();
-        } finally {
+        } catch(IOException e) {
+        	throw new TranslatorException(e);
+        }
+        finally {
             this.connection.unRegisterMarshaller(this.marshaller);
         }
     }
