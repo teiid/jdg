@@ -122,7 +122,7 @@ public class InfinispanResponse {
     }
     
 	private List<Object> buildRow(Object[] values) throws IOException {
-		ArrayList<Object> result = new ArrayList<>();
+		ArrayList<Object> result = new ArrayList<Object>();
 		int i = 0;
 		for (Map.Entry<String, Class<?>> attr : this.projected.entrySet()) {
 			result.add(ProtobufDataManager.convertToRuntime(attr.getValue(), values[i]));

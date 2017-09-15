@@ -61,6 +61,7 @@ public class ProtobufDataManager {
 
     private static HashMap<ScalarType, String> protoTypes = new HashMap<ScalarType, String>();
     private static HashMap<String, ScalarType> teiidTypes = new HashMap<String, ScalarType>();
+    private static HashMap<String, Type> protobufTypes = new HashMap<String, Type>();
 
     static {
         protoTypes.put(ScalarType.STRING, DataTypeManager.DefaultDataTypes.STRING);
@@ -103,6 +104,23 @@ public class ProtobufDataManager {
         // will fail for most values
         teiidTypes.put(DataTypeManager.DefaultDataTypes.OBJECT, ScalarType.BYTES);
         teiidTypes.put(DataTypeManager.DefaultDataTypes.GEOMETRY, ScalarType.BYTES);
+        
+      	 protobufTypes.put("bool", Type.BOOL);
+         protobufTypes.put("bytes", Type.BYTES);
+         protobufTypes.put("double", Type.DOUBLE);
+         protobufTypes.put("float", Type.FLOAT);
+         protobufTypes.put("fixed32", Type.FIXED32);
+         protobufTypes.put("fixed64", Type.FIXED64);
+         protobufTypes.put("int32", Type.INT32);
+         protobufTypes.put("int64", Type.INT64);
+         protobufTypes.put("sfixed32", Type.SFIXED32);
+         protobufTypes.put("sfixed64", Type.SFIXED64);
+         protobufTypes.put("sint32", Type.SINT32);
+         protobufTypes.put("sint64", Type.SINT64);
+         protobufTypes.put("string", Type.STRING);
+         protobufTypes.put("uint32", Type.UINT32);
+         protobufTypes.put("uint64", Type.UINT64);
+
     }
 
     public static String teiidType(DataType protoType, boolean array, boolean isEnum) {
@@ -148,7 +166,7 @@ public class ProtobufDataManager {
 	            return new BigDecimal((String)contents);
 	        }
         } else if (contents instanceof byte[]) {
-            byte[] rawContents = (byte[]) contents;
+            final byte[] rawContents = (byte[]) contents;
             if (expectedType.isAssignableFrom(String.class)) {
                 try {
                     return new String(rawContents, "UTF-8");
@@ -247,40 +265,47 @@ public class ProtobufDataManager {
     }
 
     public static Type parseProtobufType(String name) {
-        switch (name) {
-        case "bool":
-            return Type.BOOL;
-        case "bytes":
-            return Type.BYTES;
-        case "double":
-            return Type.DOUBLE;
-        case "float":
-            return Type.FLOAT;
-        case "fixed32":
-            return Type.FIXED32;
-        case "fixed64":
-            return Type.FIXED64;
-        case "int32":
-            return Type.INT32;
-        case "int64":
-            return Type.INT64;
-        case "sfixed32":
-            return Type.SFIXED32;
-        case "sfixed64":
-            return Type.SFIXED64;
-        case "sint32":
-            return Type.SINT32;
-        case "sint64":
-            return Type.SINT64;
-        case "string":
-            return Type.STRING;
-        case "uint32":
-            return Type.UINT32;
-        case "uint64":
-            return Type.UINT64;
-        default:
-            throw new TeiidRuntimeException("unrecognised type in metadata :" + name);
-        }
+    	Type t = protobufTypes.get(name);
+    	 
+    	if (t == null) {
+    		throw new TeiidRuntimeException("unrecognised type in metadata :" + name);
+    	}
+
+    	return t;
+ //        switch (name) {
+//        case "bool":
+//            return Type.BOOL;
+//        case "bytes":
+//            return Type.BYTES;
+//        case "double":
+//            return Type.DOUBLE;
+//        case "float":
+//            return Type.FLOAT;
+//        case "fixed32":
+//            return Type.FIXED32;
+//        case "fixed64":
+//            return Type.FIXED64;
+//        case "int32":
+//            return Type.INT32;
+//        case "int64":
+//            return Type.INT64;
+//        case "sfixed32":
+//            return Type.SFIXED32;
+//        case "sfixed64":
+//            return Type.SFIXED64;
+//        case "sint32":
+//            return Type.SINT32;
+//        case "sint64":
+//            return Type.SINT64;
+//        case "string":
+//            return Type.STRING;
+//        case "uint32":
+//            return Type.UINT32;
+//        case "uint64":
+//            return Type.UINT64;
+//        default:
+//            throw new TeiidRuntimeException("unrecognised type in metadata :" + name);
+//        }
     }
 
     public static Type getCompatibleProtobufType(Class<?> type) {

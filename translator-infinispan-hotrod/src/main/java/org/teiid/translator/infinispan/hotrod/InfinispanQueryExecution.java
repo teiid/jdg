@@ -23,6 +23,7 @@ package org.teiid.translator.infinispan.hotrod;
 
 import java.util.List;
 import java.util.Collection;
+import java.io.IOException;
 
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;

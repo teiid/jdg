@@ -357,8 +357,7 @@
 				<version>${version.teiid}</version>
 				<type>test-jar</type>
 				<scope>test</scope>
-			</dependency>
-
+			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid</groupId>
 				<artifactId>teiid-common-core</artifactId>
@@ -478,7 +477,12 @@
 	            <groupId>org.jboss.teiid.connectors</groupId>
 	            <artifactId>connector-jdg-hotrod</artifactId>
 	            <version>${project.version}</version>
-	        </dependency>		
+	        </dependency>	        
+			<dependency>
+				<groupId>org.jboss.teiid.connectors</groupId>
+				<artifactId>connector-infinispan-hotrod</artifactId>
+				<version>${version.teiid}</version>
+			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>connector-jdg-hotrod</artifactId>
@@ -556,8 +560,8 @@
 	</dependencyManagement>
 	<modules>
         <!-- no need to build jdg, as the JDV 6.x integration is conming from the resource-adapter/translators on the teiid 64 branch -->
-		<module>translator-jdg-hotrod</module>
-		<module>connector-jdg-hotrod</module>
+		<!-- >module>translator-jdg-hotrod</module>
+		<module>connector-jdg-hotrod</module-->
 		<module>document-api</module>
 		<module>infinispan-api</module>
         <module>translator-infinispan-hotrod</module>

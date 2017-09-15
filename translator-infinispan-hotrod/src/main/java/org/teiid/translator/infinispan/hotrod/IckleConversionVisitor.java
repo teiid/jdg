@@ -66,7 +66,7 @@ public class IckleConversionVisitor extends SQLStringVisitor {
     protected boolean avoidProjection = false;
     private DocumentNode rootNode;
     private DocumentNode joinedNode;
-    private LinkedHashMap<String, Class<?>> projectedDocumentAttributes = new LinkedHashMap<>();
+    private LinkedHashMap<String, Class<?>> projectedDocumentAttributes = new LinkedHashMap<String, Class<?>>();
     private AtomicInteger aliasCounter = new AtomicInteger();
     protected boolean nested;
 
