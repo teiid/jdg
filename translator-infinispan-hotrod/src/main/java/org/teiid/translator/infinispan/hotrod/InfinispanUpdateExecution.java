@@ -157,8 +157,9 @@ public class InfinispanUpdateExecution implements UpdateExecution {
                     @Override
                     public void run(Object row) throws TranslatorException {
                         InfinispanDocument previous = (InfinispanDocument)row;
+                        Object key = previous.getProperties().get(PK);
                         int count = mergeUpdatePayload(previous, visitor.getInsertPayload());
-                        cache.replace(previous.getProperties().get(PK), previous);
+                        cache.replace(key, previous);
                         updateCount = updateCount + count;
                     }
                 }, this.executionContext.getBatchSize());
