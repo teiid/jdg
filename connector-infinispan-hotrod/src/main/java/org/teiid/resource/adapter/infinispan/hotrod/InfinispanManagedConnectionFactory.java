@@ -126,21 +126,22 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
 
         public void registerProtobufFile(ProtobufResource protobuf) throws TranslatorException {
             try {
-                if (protobuf != null && !this.registeredProtoFiles.contains(protobuf.getIdentifier())) {
+                if (protobuf != null) {
                     // client side
                     this.ctx.registerProtoFiles(FileDescriptorSource.fromString(protobuf.getIdentifier(), protobuf.getContents()));
 
                     // server side
                     RemoteCache<String, String> metadataCache = this.cacheManager
                             .getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
-                    if (metadataCache != null && metadataCache.get(protobuf.getIdentifier()) == null) {
+                    if (metadataCache != null) {
                         metadataCache.put(protobuf.getIdentifier(), protobuf.getContents());
                         String errors = metadataCache.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
                         if (errors != null) {
                            throw new TranslatorException(InfinispanManagedConnectionFactory.UTIL.getString("proto_error", errors));
                         }
-                        this.registeredProtoFiles.add(protobuf.getIdentifier());
                     }
+                } else {
+                	throw new TranslatorException(InfinispanManagedConnectionFactory.UTIL.getString("no_protobuf"));
                 }
             } catch(Throwable t) {
                 throw new TranslatorException(t);
