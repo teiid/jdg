@@ -12,9 +12,7 @@
         
         <includes>
             <include>org.jboss.teiid.connectors:connector-infinispan-hotrod</include>
-            <!--include>org.jboss.teiid.connectors:connector-jdg-hotrod</include-->
             <include>org.jboss.teiid.connectors:translator-infinispan-hotrod</include>
-            <!--include>org.jboss.teiid.connectors:translator-jdg-hotrod</include-->
          	<include>org.jboss.teiid.connectors:infinispan-api</include>
             <include>org.jboss.teiid.connectors:document-api</include>
             
