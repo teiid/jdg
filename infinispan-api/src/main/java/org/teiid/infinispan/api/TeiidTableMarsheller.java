@@ -1,27 +1,24 @@
 /*
- * JBoss, Home of Professional Open Source.
- * See the COPYRIGHT.txt file distributed with this work for information
- * regarding copyright ownership.  Some portions may be licensed
- * to Red Hat, Inc. under one or more contributor license agreements.
+ * Copyright Red Hat, Inc. and/or its affiliates
+ * and other contributors as indicated by the @author tags and
+ * the COPYRIGHT.txt file distributed with this work.
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-package org.teiid.translator.infinispan.hotrod;
+package org.teiid.infinispan.api;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -33,15 +30,13 @@ import org.infinispan.protostream.RawProtoStreamWriter;
 import org.infinispan.protostream.RawProtobufMarshaller;
 import org.infinispan.protostream.impl.ByteArrayOutputStreamEx;
 import org.infinispan.protostream.impl.RawProtoStreamWriterImpl;
-import org.teiid.infinispan.api.InfinispanDocument;
-import org.teiid.infinispan.api.ProtobufDataManager;
-import org.teiid.infinispan.api.TableWireFormat;
+import org.teiid.infinispan.api.DocumentFilter.Action;
 import org.teiid.translator.TranslatorException;
 import org.teiid.translator.document.Document;
-import org.teiid.translator.infinispan.hotrod.DocumentFilter.Action;
 
-public class TeiidTableMarsheller implements RawProtobufMarshaller<InfinispanDocument> {
-    private String documentName;
+public class TeiidTableMarsheller implements RawProtobufMarshaller<InfinispanDocument>, Serializable {
+	private static final long serialVersionUID = 6540991524742624955L;
+	private String documentName;
     private TreeMap<Integer, TableWireFormat> wireMap = new TreeMap<Integer, TableWireFormat>();
     private DocumentFilter docFilter;
 

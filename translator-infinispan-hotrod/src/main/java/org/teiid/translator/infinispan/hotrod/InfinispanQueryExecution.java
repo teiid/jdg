@@ -21,19 +21,22 @@
  */
 package org.teiid.translator.infinispan.hotrod;
 
-import java.util.List;
-import java.util.Collection;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.api.BasicCache;
+import org.teiid.infinispan.api.DocumentFilter;
 import org.teiid.infinispan.api.InfinispanConnection;
+import org.teiid.infinispan.api.TeiidTableMarsheller;
+import org.teiid.infinispan.api.DocumentFilter.Action;
 import org.teiid.language.ColumnReference;
 import org.teiid.language.Command;
-import org.teiid.language.NamedTable;
 import org.teiid.language.QueryExpression;
 import org.teiid.language.Select;
+import org.teiid.language.NamedTable;
 import org.teiid.language.visitor.CollectorVisitor;
 import org.teiid.language.visitor.SQLStringVisitor;
 import org.teiid.logging.LogConstants;
@@ -46,11 +49,10 @@ import org.teiid.translator.DataNotAvailableException;
 import org.teiid.translator.ExecutionContext;
 import org.teiid.translator.ResultSetExecution;
 import org.teiid.translator.TranslatorException;
-import org.teiid.translator.infinispan.hotrod.DocumentFilter.Action;
 
 public class InfinispanQueryExecution implements ResultSetExecution {
 
-	private Select command;
+    private Select command;
     private InfinispanConnection connection;
     private RuntimeMetadata metadata;
     private ExecutionContext executionContext;
@@ -58,28 +60,30 @@ public class InfinispanQueryExecution implements ResultSetExecution {
     private TeiidTableMarsheller marshaller;
     private boolean useAliasCache;
 
-    public InfinispanQueryExecution(InfinispanExecutionFactory translator, QueryExpression command,
-	                        ExecutionContext executionContext, RuntimeMetadata metadata, InfinispanConnection connection,
-	                        boolean useAliasCache) throws TranslatorException {
-	        this.command = (Select)command;
-	        this.connection = connection;
-	        this.metadata = metadata;
-	        this.executionContext = executionContext;
-	        this.useAliasCache = useAliasCache;
+	public InfinispanQueryExecution(InfinispanExecutionFactory translator, QueryExpression command,
+			ExecutionContext executionContext, RuntimeMetadata metadata, InfinispanConnection connection,
+			boolean useAliasCache) throws TranslatorException {
+        this.command = (Select)command;
+        this.connection = connection;
+        this.metadata = metadata;
+        this.executionContext = executionContext;
+        this.useAliasCache = useAliasCache;
     }
-    
+
     @Override
     public void execute() throws TranslatorException {
         try {
             if (useAliasCache) {
-	            useModifiedGroups(this.connection, this.executionContext, this.metadata, this.command);
-	        }
+            	useModifiedGroups(this.connection, this.executionContext, this.metadata, this.command);
+            }
+            
             final IckleConversionVisitor visitor = new IckleConversionVisitor(metadata, false);
             visitor.append(this.command);
             Table table = visitor.getParentTable();
+            
             String queryStr = visitor.getQuery();
             LogManager.logDetail(LogConstants.CTX_CONNECTOR, "SourceQuery:", queryStr);
-
+            
             DocumentFilter docFilter = null;
             if (queryStr.startsWith("FROM ") && ((Select)command).getWhere() != null) {
                 SQLStringVisitor ssv = new SQLStringVisitor() {
@@ -105,7 +109,7 @@ public class InfinispanQueryExecution implements ResultSetExecution {
             this.connection.unRegisterMarshaller(this.marshaller);
         }
     }
-    
+
 	static void useModifiedGroups(InfinispanConnection connection, ExecutionContext context, RuntimeMetadata metadata,
 			Command command) throws TranslatorException {
 		BasicCache<String, String> aliasCache = InfinispanDirectQueryExecution.getAliasCache(connection);

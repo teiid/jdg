@@ -33,6 +33,7 @@ import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.client.hotrod.marshall.ProtoStreamMarshaller;
+import org.infinispan.commons.marshall.jboss.GenericJBossMarshaller;
 import org.infinispan.protostream.FileDescriptorSource;
 import org.infinispan.protostream.SerializationContext;
 import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
@@ -50,21 +51,19 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
     private String remoteServerList;
     private String cacheName;
     
-         // security
-         private String[] saslAllowed = {"CRAM-MD5", "DIGEST-MD5", "PLAIN"}; 
-         private String saslMechanism;
-         private String userName;
-         private String password;
-         private String authenticationRealm;
-         private String authenticationServerName;
-     
-         private String trustStoreFileName = System.getProperty("javax.net.ssl.trustStore");
-         private String trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
-         private String keyStoreFileName = System.getProperty("javax.net.ssl.keyStore");
-         private String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword");
-         
-    private ProtobufResource protobuf;
+    // security
+    private String[] saslAllowed = {"CRAM-MD5", "DIGEST-MD5", "PLAIN"}; 
+    private String saslMechanism;
+    private String userName;
+    private String password;
+    private String authenticationRealm;
+    private String authenticationServerName;
 
+    private String trustStoreFileName = System.getProperty("javax.net.ssl.trustStore");
+    private String trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+    private String keyStoreFileName = System.getProperty("javax.net.ssl.keyStore");
+    private String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword");
+    
     public String getRemoteServerList() {
         return remoteServerList;
     }
@@ -94,66 +93,56 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
     class InfinispanConnectionFactory extends BasicConnectionFactory<InfinispanConnectionImpl> {
         private static final long serialVersionUID = 1064143496037686580L;
         private RemoteCacheManager cacheManager;
-        private HashSet<String> registeredProtoFiles = new HashSet<String>();
+        private RemoteCacheManager scriptCacheManager;
         private SerializationContext ctx;
 
         public InfinispanConnectionFactory() throws ResourceException {
-        	if (remoteServerList == null) {
-        		throw new RuntimeException("RemoteServerList is null");
-        	}
-            try {
-                ConfigurationBuilder builder = new ConfigurationBuilder();
-                builder.addServers(remoteServerList);
-                builder.marshaller(new ProtoStreamMarshaller());
-
-                handleSecurity(builder);
-                // note this object is expensive, so there needs to only one
-                // instance for the JVM, in this case one per RA instance.
-                this.cacheManager = new RemoteCacheManager(builder.build());
-
-                // register default marshellers
-                /*
-                SerializationContext ctx = ProtoStreamMarshaller.getSerializationContext(this.cacheManager);
-                FileDescriptorSource fds = new FileDescriptorSource();
-                ctx.registerProtoFiles(fds);
-                */
-                this.cacheManager.start();
-                this.ctx = ProtoStreamMarshaller.getSerializationContext(this.cacheManager);
-            } catch (Throwable e) {
-                throw new ResourceException(e);
-            }
+		if (remoteServerList == null) {
+			throw new RuntimeException("RemoteServerList is null");
+		}
+            buildCacheManager();
+            buildScriptCacheManager();
         }
 
-        public void registerProtobufFile(ProtobufResource protobuf) throws TranslatorException {
-            try {
-                if (protobuf != null) {
-                    // client side
-                    this.ctx.registerProtoFiles(FileDescriptorSource.fromString(protobuf.getIdentifier(), protobuf.getContents()));
+        private void buildCacheManager() throws ResourceException {
+	    try {
+	        ConfigurationBuilder builder = new ConfigurationBuilder();
+	        builder.addServers(remoteServerList);
+	        builder.marshaller(new ProtoStreamMarshaller());
 
-                    // server side
-                    RemoteCache<String, String> metadataCache = this.cacheManager
-                            .getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
-                    if (metadataCache != null) {
-                        metadataCache.put(protobuf.getIdentifier(), protobuf.getContents());
-                        String errors = metadataCache.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
-                        if (errors != null) {
-                           throw new TranslatorException(InfinispanManagedConnectionFactory.UTIL.getString("proto_error", errors));
-                        }
-                    }
-                } else {
-                	throw new TranslatorException(InfinispanManagedConnectionFactory.UTIL.getString("no_protobuf"));
-                }
-            } catch(Throwable t) {
-                throw new TranslatorException(t);
+	        handleSecurity(builder);
+	        // note this object is expensive, so there needs to only one
+	        // instance for the JVM, in this case one per RA instance.
+	        this.cacheManager = new RemoteCacheManager(builder.build());
 
-            }
+	        // register default marshellers
+	        /*
+	        SerializationContext ctx = ProtoStreamMarshaller.getSerializationContext(this.cacheManager);
+	        FileDescriptorSource fds = new FileDescriptorSource();
+	        ctx.registerProtoFiles(fds);
+	        */
+	        this.cacheManager.start();
+	        this.ctx = ProtoStreamMarshaller.getSerializationContext(this.cacheManager);
+	    } catch (Throwable e) {
+	        throw new ResourceException(e);
+	    }
         }
 
-        @Override
-        public InfinispanConnectionImpl getConnection() throws ResourceException {
-            return new InfinispanConnectionImpl(this.cacheManager, cacheName,this.ctx, this);
-        }
-    }
+	private void buildScriptCacheManager() throws ResourceException {
+		try {
+		        ConfigurationBuilder builder = new ConfigurationBuilder();
+		        builder.addServers(remoteServerList);
+		        builder.marshaller(new GenericJBossMarshaller());
+		        handleSecurity(builder);
+
+		        // note this object is expensive, so there needs to only one
+		        // instance for the JVM, in this case one per RA instance.
+		        this.scriptCacheManager = new RemoteCacheManager(builder.build());
+		        this.scriptCacheManager.start();
+		 } catch (Throwable e) {
+		        throw new ResourceException(e);
+		 }
+	}	
 
     public void handleSecurity(ConfigurationBuilder builder) throws ResourceException {
             if (saslMechanism != null && supportedSasl(saslMechanism)) {                    
@@ -211,6 +200,35 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
             return false;
         }
 
+        public void registerProtobufFile(ProtobufResource protobuf) throws TranslatorException {
+            try {
+                if (protobuf != null) {
+                    // client side
+                    this.ctx.registerProtoFiles(FileDescriptorSource.fromString(protobuf.getIdentifier(), protobuf.getContents()));
+
+                    // server side
+                    RemoteCache<String, String> metadataCache = this.cacheManager
+                            .getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
+                    if (metadataCache != null) {
+                        metadataCache.put(protobuf.getIdentifier(), protobuf.getContents());
+                        String errors = metadataCache.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
+                        if (errors != null) {
+                           throw new TranslatorException(InfinispanManagedConnectionFactory.UTIL.getString("proto_error", errors));
+                        }
+                    }
+                } else {
+                	throw new TranslatorException(InfinispanManagedConnectionFactory.UTIL.getString("no_protobuf"));
+                }
+            } catch(Throwable t) {
+                throw new TranslatorException(t);
+            }
+        }
+
+        @Override
+        public InfinispanConnectionImpl getConnection() throws ResourceException {
+            return new InfinispanConnectionImpl(this.cacheManager, this.scriptCacheManager, cacheName,this.ctx, this);
+        }
+    }
 
     public String getSaslMechanism() {
         return saslMechanism;
@@ -284,7 +302,6 @@ public class InfinispanManagedConnectionFactory extends BasicManagedConnectionFa
         this.keyStorePassword = keyStorePassword;
     }
     
-
     @Override
     public int hashCode() {
         final int prime = 31;
