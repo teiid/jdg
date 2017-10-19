@@ -26,9 +26,6 @@
 		<version.org.jboss.integration-platform>6.0.0.CR30</version.org.jboss.integration-platform>
 		<version.teiid>8.12.11.6_4</version.teiid>
 
-		<!-- this should match what ${project.version} would be -->
-		<version.teiidjdg>8.12.11.6_4</version.teiidjdg>
-
 		<version.org.hibernate.core>5.0.1.Final-redhat-2</version.org.hibernate.core> <!-- 5.5.1.Final -->
 		<version.org.infinispan.hibernate.search>5.6.0.Final-redhat-1</version.org.infinispan.hibernate.search>
 
@@ -444,49 +441,49 @@
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>document-api</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>infinispan-api</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-infinispan-hotrod</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-infinispan-hotrod</artifactId>
 				<type>test-jar</type>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>				
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-jdg-hotrod</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>translator-jdg-hotrod</artifactId>
 				<type>test-jar</type>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>
 	        <dependency>
 	            <groupId>org.jboss.teiid.connectors</groupId>
 	            <artifactId>connector-jdg-hotrod</artifactId>
-	            <version>${version.teiidjdg}</version>
+	            <version>${project.version}</version>
 	        </dependency>	        
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>connector-infinispan-hotrod</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 			</dependency>	
 			<dependency>
 				<groupId>org.jboss.teiid.connectors</groupId>
 				<artifactId>connector-jdg-hotrod</artifactId>
-				<version>${version.teiidjdg}</version>
+				<version>${project.version}</version>
 				<type>test-jar</type>
 			</dependency>			
 			<!--dependency>
