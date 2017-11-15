@@ -102,9 +102,13 @@ public class ProtobufSchema  implements InfinispanSchemaDefinition {
 
 			String errors = metadataCache
 					.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
-			if (errors != null) {
+			// ispn removes leading '/' in a string in the results
+			String protoSchemaIdent = (protoBufResource.startsWith("/"))
+			? protoBufResource.substring(1)
+			: protoBufResource;
+			if (errors != null && isProtoSchemaInErrors(protoSchemaIdent, errors)) {
 				throw new ResourceException(
-						"Error registering Protobuf schema files:\n" + errors);
+						"Error registering Protobuf schema file " + protoSchemaIdent + ". See errors:\n" + errors);
 			}
 
 			for (String clzName : cmap.keySet()) {
@@ -135,7 +139,16 @@ public class ProtobufSchema  implements InfinispanSchemaDefinition {
 			throw new ResourceException(InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25032), e);
 		}
 	}
-	
+
+	private boolean isProtoSchemaInErrors(String ident, String errors) {
+		for (String s : errors.split("\n")) {
+			if (s.trim().startsWith(ident)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private String readResource(String resourcePath, ClassLoader cl)
 			throws IOException {
 		InputStream is = cl.getResourceAsStream(resourcePath);
