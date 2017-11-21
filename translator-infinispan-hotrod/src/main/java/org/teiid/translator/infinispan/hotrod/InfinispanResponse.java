@@ -75,11 +75,18 @@ public class InfinispanResponse {
         query.maxResults(nextBatch);
         List<Object> values = query.list();
 
-        if (query.getResultSize() < nextBatch) {
+        if (values == null || values.isEmpty()) {
             this.lastBatch = true;
+            this.responseIter = null;
+       	
+        } else if (values.size() < nextBatch) {
+            this.lastBatch = true;
+            this.responseIter = values.iterator();
+            nextBatch = values.size();
+            
+        } else {
+        	this.responseIter = values.iterator();
         }
-
-        this.responseIter = values.iterator();
         offset = offset + nextBatch;
     }
 
@@ -101,14 +108,19 @@ public class InfinispanResponse {
         } else {
             if (lastBatch) {
                 return null;
-            } else {
+            } 
                 fetchNextBatch();
+
+                if (this.responseIter == null) {
+                	return null;
+                }
                 Object row = this.responseIter.next();
                 if (row instanceof Object[]) {
                     return Arrays.asList((Object[])row);
                 }
                 this.currentDocumentRows = this.documentNode.tuples((InfinispanDocument)row);
-            }
+
+            
         }
         return getNextRow();
     }
