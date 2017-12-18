@@ -346,22 +346,22 @@ public class InfinispanUpdateExecution implements UpdateExecution {
         Query query = qf.create(queryStr);
 
         int offset = 0;
-        query.startOffset(0);
-        query.maxResults(batchSize);
-        List<Object> values = query.list();
-        while (true) {
-            for(Object doc : values) {
+        while (true) {       	
+        	
+            query.startOffset(offset);
+            query.maxResults(batchSize);
+            List<Object> values = query.list();
+            
+            if (values == null || values.isEmpty()) {
+                break;
+            } 
+           	for(Object doc : values) {
                 task.run(doc);
             }
-            if (query.getResultSize() < batchSize) {
-                break;
-            }
-            offset = offset + batchSize;
-            query.startOffset(offset);
-            values = query.list();
+
         }
     }
-
+    
 
     @Override
     public int[] getUpdateCounts() throws DataNotAvailableException, TranslatorException {
