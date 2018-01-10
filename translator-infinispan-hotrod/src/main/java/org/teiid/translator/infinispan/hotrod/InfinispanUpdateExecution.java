@@ -141,7 +141,7 @@ public class InfinispanUpdateExecution implements UpdateExecution {
 			final RemoteCache<Object, Object> cache = InfinispanQueryExecution.getCache(table, connection);
 
             if (visitor.getOperationType() == OperationType.DELETE) {
-                paginateResults(cache, visitor.getDeleteQuery(), new Task() {
+            	paginateDeleteResults(cache, visitor.getDeleteQuery(), new Task() {
                     @Override
                     public void run(Object row) throws TranslatorException {
                         if (visitor.isNestedOperation()) {
@@ -158,7 +158,7 @@ public class InfinispanUpdateExecution implements UpdateExecution {
                     }
                 }, this.executionContext.getBatchSize());
             } else if (visitor.getOperationType() == OperationType.UPDATE) {
-                paginateResults(cache, visitor.getUpdateQuery(), new Task() {
+            	paginateUpdateResults(cache, visitor.getUpdateQuery(), new Task() {
                     @Override
                     public void run(Object row) throws TranslatorException {
                         InfinispanDocument previous = (InfinispanDocument)row;
@@ -339,29 +339,70 @@ public class InfinispanUpdateExecution implements UpdateExecution {
 		}
 	}
 	
-    static void paginateResults(RemoteCache<Object, Object> cache, String queryStr, Task task, int batchSize)
-            throws TranslatorException {
+	/*
+	 * pagination for delete does not need to use the offset, because when a delete is done, the subsequent query does not include
+	 * the previously removed objects.
+	 */
+	   static void paginateDeleteResults(RemoteCache<Object, Object> cache, String queryStr, Task task, int batchSize)
+	            throws TranslatorException {
 
-        QueryFactory qf = Search.getQueryFactory(cache);
-        Query query = qf.create(queryStr);
+	    	if (cache.isEmpty()) return;
+	    	
+			QueryFactory qf = Search.getQueryFactory(cache);
+			Query query = qf.create(queryStr);
+
+			try {
+				int offset = 0;
+				while (true) {
+		
+					query.startOffset(offset);
+					query.maxResults(batchSize);
+		
+					int cnt = query.getResultSize();
+					List<Object> values = query.list();
+		
+					if (values == null || values.isEmpty()) {
+						break;
+					}
+					for (Object doc : values) {
+						task.run(doc);
+					}		
+
+				}
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+
+	    }
+	
+		/*
+		 * pagination for update options does use the offset, because the query returns the same set of objects, so the
+		 * offset has to be used to position the next group of objects to be updated 
+		 */
+
+    static void paginateUpdateResults(RemoteCache<Object, Object> cache, String queryStr, Task task, int batchSize)
+            throws TranslatorException {
+    	
+		QueryFactory qf = Search.getQueryFactory(cache);
+		Query query = qf.create(queryStr);
 
         int offset = 0;
-        while (true) {       	
-        	
-            query.startOffset(offset);
-            query.maxResults(batchSize);
-            List<Object> values = query.list();
-            
-            if (values == null || values.isEmpty()) {
-                break;
-            } 
-           	for(Object doc : values) {
+        query.startOffset(0);
+        query.maxResults(batchSize);
+        List<Object> values = query.list();
+        while (true) {
+            for(Object doc : values) {
                 task.run(doc);
             }
-
+            if (query.getResultSize() < batchSize) {
+                break;
+            }
+            offset = offset + batchSize;
+            query.startOffset(offset);
+            values = query.list();
         }
-    }
-    
+
+}
 
     @Override
     public int[] getUpdateCounts() throws DataNotAvailableException, TranslatorException {
