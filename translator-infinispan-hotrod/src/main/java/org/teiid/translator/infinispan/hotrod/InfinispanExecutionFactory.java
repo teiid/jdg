@@ -56,6 +56,7 @@ public class InfinispanExecutionFactory extends ExecutionFactory<ConnectionFacto
 
 	private boolean supportsCompareCriteriaOrdered = true;
 	private boolean supportsUpsert = true;
+	private boolean supportsBulkUpdates = false;
 
 	public InfinispanExecutionFactory() {
 				
@@ -80,25 +81,26 @@ public class InfinispanExecutionFactory extends ExecutionFactory<ConnectionFacto
     public ResultSetExecution createResultSetExecution(QueryExpression command,
             ExecutionContext executionContext, RuntimeMetadata metadata,
             InfinispanConnection connection) throws TranslatorException {
-        return new InfinispanQueryExecution(this, command, executionContext, metadata, connection,
-	                                supportsDirectQueryProcedure());
-        }
+		return new InfinispanQueryExecution(this, command, executionContext, metadata, connection,
+				supportsDirectQueryProcedure());
+    }
 
     @Override
     public UpdateExecution createUpdateExecution(Command command,
             ExecutionContext executionContext, RuntimeMetadata metadata,
             InfinispanConnection connection) throws TranslatorException {
         return new InfinispanUpdateExecution(command, executionContext, metadata,
-        		 connection, supportsDirectQueryProcedure());
+                connection, supportsDirectQueryProcedure());
     }
 
 	@Override
 	public ProcedureExecution createDirectExecution(List<Argument> arguments, Command command,
 			ExecutionContext executionContext, RuntimeMetadata metadata, InfinispanConnection connection)
 			throws TranslatorException {
-		return new InfinispanDirectQueryExecution(arguments, command, executionContext, metadata, connection);
+		return new InfinispanDirectQueryExecution(arguments, command, executionContext,
+				metadata, connection);
 	}
-
+    
     @Override
     public void getMetadata(MetadataFactory metadataFactory, InfinispanConnection conn) throws TranslatorException {
         ProtobufMetadataProcessor metadataProcessor = (ProtobufMetadataProcessor)getMetadataProcessor();
@@ -111,7 +113,6 @@ public class InfinispanExecutionFactory extends ExecutionFactory<ConnectionFacto
         Schema schema = metadataFactory.getSchema();
         ProtobufResource resource = null;
         ArrayList<Table> removedTables = new ArrayList<Table>();
-// not backported to 6.4.x
         if (schema.getTables() != null && !schema.getTables().isEmpty()) {
             SchemaToProtobufProcessor stpp = new SchemaToProtobufProcessor();
             stpp.setIndexMessages(true);
@@ -127,37 +128,36 @@ public class InfinispanExecutionFactory extends ExecutionFactory<ConnectionFacto
         }
 
         metadataProcessor.process(metadataFactory, conn);
+        
+        // TEIID-4896: In the process of DDL->proto, the extension properties defined on the schema
+        // may be not carried forward, we need to make sure we copy those back.
+        for (Table oldT : removedTables) {
+            Table newT = schema.getTable(oldT.getName());
+            Map<String, String> properties = oldT.getProperties();
+            for (Map.Entry<String, String> entry:properties.entrySet()) {
+                newT.setProperty(entry.getKey(), entry.getValue());
+            }
+            newT.setSupportsUpdate(oldT.supportsUpdate());
+            if (oldT.getAnnotation() != null) {
+                newT.setAnnotation(oldT.getAnnotation());
+            }
+            
+            List<Column> columns = oldT.getColumns();
+            for (Column c : columns) {
+                Column newCol = newT.getColumnByName(c.getName());
+                if (newCol != null) {
+                    Map<String, String> colProperties = c.getProperties();
+                    for (Map.Entry<String, String> entry:colProperties.entrySet()) {
+                        newCol.setProperty(entry.getKey(), entry.getValue());
+                    }
+                    newCol.setUpdatable(c.isUpdatable());
+                    if (c.getAnnotation() != null) {
+                        newCol.setAnnotation(c.getAnnotation());
+                    }
+                }
+            }
+        }        
 
-        
-         // TEIID-4896: In the process of DDL->proto, the extension properties defined on the schema
-         // may be not carried forward, we need to make sure we copy those back.
-         for (Table oldT : removedTables) {
-             Table newT = schema.getTable(oldT.getName());
-             Map<String, String> properties = oldT.getProperties();
-             for (Map.Entry<String, String> entry:properties.entrySet()) {
-                 newT.setProperty(entry.getKey(), entry.getValue());
-             }
-             newT.setSupportsUpdate(oldT.supportsUpdate());
-             if (oldT.getAnnotation() != null) {
-                 newT.setAnnotation(oldT.getAnnotation());
-             }
-             
-             List<Column> columns = oldT.getColumns();
-             for (Column c : columns) {
-                 Column newCol = newT.getColumnByName(c.getName());
-                 if (newCol != null) {
-                     Map<String, String> colProperties = c.getProperties();
-                     for (Map.Entry<String, String> entry:colProperties.entrySet()) {
-                         newCol.setProperty(entry.getKey(), entry.getValue());
-                     }
-                     newCol.setUpdatable(c.isUpdatable());
-                     if (c.getAnnotation() != null) {
-                         newCol.setAnnotation(c.getAnnotation());
-                     }
-                 }
-             }
-         }               
-        
         resource = metadataProcessor.getProtobufResource();
         if(resource == null) {
             SchemaToProtobufProcessor stpp = new SchemaToProtobufProcessor();

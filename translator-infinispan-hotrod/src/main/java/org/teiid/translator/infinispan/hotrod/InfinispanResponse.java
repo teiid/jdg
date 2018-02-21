@@ -47,8 +47,8 @@ public class InfinispanResponse {
     private DocumentNode documentNode;
     private List<Map<String, Object>> currentDocumentRows;
 
-    public InfinispanResponse(RemoteCache<Object, Object> cache, String queryStr, int batchSize, Integer limit,
-            Integer offset, Map<String, Class<?>> projected, DocumentNode documentNode) {
+	public InfinispanResponse(RemoteCache<Object, Object> cache, String queryStr, int batchSize, Integer limit,
+			Integer offset, Map<String, Class<?>> projected, DocumentNode documentNode) {
         this.batchSize = batchSize;
         this.offset = offset == null?0:offset;
         this.limit = limit;
@@ -102,7 +102,7 @@ public class InfinispanResponse {
         if (responseIter != null && responseIter.hasNext()){
             Object row = this.responseIter.next();
             if (row instanceof Object[]) {
-            	return buildRow((Object[])row);
+                return buildRow((Object[])row);
             }
             this.currentDocumentRows = this.documentNode.tuples((InfinispanDocument)row);
         } else {
@@ -128,7 +128,7 @@ public class InfinispanResponse {
     private List<Object> buildRow(Map<String, Object> row) throws IOException {
         ArrayList<Object> result = new ArrayList<Object>();
         for (Map.Entry<String, Class<?>> attr : this.projected.entrySet()) {
-        	result.add(ProtobufDataManager.convertToRuntime(attr.getValue(), row.get(attr.getKey())));
+            result.add(ProtobufDataManager.convertToRuntime(attr.getValue(), row.get(attr.getKey())));
         }
         return result;
     }

@@ -21,18 +21,24 @@
  */
 package org.teiid.translator.infinispan.hotrod;
 
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.Search;
 import org.infinispan.query.dsl.Query;
 import org.infinispan.query.dsl.QueryFactory;
+import org.teiid.infinispan.api.DocumentFilter;
+import org.teiid.infinispan.api.DocumentFilter.Action;
 import org.teiid.infinispan.api.InfinispanConnection;
 import org.teiid.infinispan.api.InfinispanDocument;
+import org.teiid.infinispan.api.TeiidTableMarsheller;
 import org.teiid.language.ColumnReference;
 import org.teiid.language.Command;
 import org.teiid.language.Delete;
+import org.teiid.language.Expression;
+import org.teiid.language.Insert;
 import org.teiid.language.NamedTable;
 import org.teiid.language.SQLConstants.Tokens;
 import org.teiid.language.visitor.SQLStringVisitor;
@@ -44,9 +50,8 @@ import org.teiid.translator.DataNotAvailableException;
 import org.teiid.translator.ExecutionContext;
 import org.teiid.translator.TranslatorException;
 import org.teiid.translator.UpdateExecution;
-import org.teiid.translator.document.Document;
-import org.teiid.translator.infinispan.hotrod.DocumentFilter.Action;
 import org.teiid.translator.infinispan.hotrod.InfinispanUpdateVisitor.OperationType;
+
 
 public class InfinispanUpdateExecution implements UpdateExecution {
     private int updateCount = 0;
@@ -57,7 +62,7 @@ public class InfinispanUpdateExecution implements UpdateExecution {
     private boolean useAliasCache;
 
     public InfinispanUpdateExecution(Command command, ExecutionContext executionContext, RuntimeMetadata metadata,
-    		InfinispanConnection connection, boolean useAliasCache) throws TranslatorException {
+            InfinispanConnection connection, boolean useAliasCache) throws TranslatorException {
         this.command = command;
         this.executionContext = executionContext;
         this.metadata = metadata;
@@ -68,13 +73,13 @@ public class InfinispanUpdateExecution implements UpdateExecution {
     @Override
     public void execute() throws TranslatorException {
 
-		if (useAliasCache) {
-			if (useAliasCache) {
+        if (useAliasCache) {
+            if (useAliasCache) {
 				InfinispanQueryExecution.useModifiedGroups(this.connection, this.executionContext, this.metadata,
 						this.command);
-			}
-		}
-     	
+            }
+        }
+    	
         final InfinispanUpdateVisitor visitor = new InfinispanUpdateVisitor(this.metadata);
         visitor.append(this.command);
 
@@ -85,6 +90,7 @@ public class InfinispanUpdateExecution implements UpdateExecution {
         TeiidTableMarsheller marshaller = null;
         try {
             Table table = visitor.getParentTable();
+        
             Column pkColumn = visitor.getPrimaryKey();
             if (pkColumn == null) {
                 throw new TranslatorException(InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25013, table.getName()));
@@ -132,11 +138,10 @@ public class InfinispanUpdateExecution implements UpdateExecution {
             this.connection.registerMarshaller(marshaller);
 
             // if the message in defined in different cache than the default, switch it out now.
-            final RemoteCache<Object,Object> cache = InfinispanQueryExecution.getCache(table, connection);
-
+			final RemoteCache<Object, Object> cache = InfinispanQueryExecution.getCache(table, connection);
 
             if (visitor.getOperationType() == OperationType.DELETE) {
-                paginateResults(cache, visitor.getDeleteQuery(), new Task() {
+            	paginateDeleteResults(cache, visitor.getDeleteQuery(), new Task() {
                     @Override
                     public void run(Object row) throws TranslatorException {
                         if (visitor.isNestedOperation()) {
@@ -153,61 +158,20 @@ public class InfinispanUpdateExecution implements UpdateExecution {
                     }
                 }, this.executionContext.getBatchSize());
             } else if (visitor.getOperationType() == OperationType.UPDATE) {
-                paginateResults(cache, visitor.getUpdateQuery(), new Task() {
+            	paginateUpdateResults(cache, visitor.getUpdateQuery(), new Task() {
                     @Override
                     public void run(Object row) throws TranslatorException {
                         InfinispanDocument previous = (InfinispanDocument)row;
                         Object key = previous.getProperties().get(PK);
-                        int count = mergeUpdatePayload(previous, visitor.getInsertPayload());
+                        int count = previous.merge(visitor.getInsertPayload());
                         cache.replace(key, previous);
                         updateCount = updateCount + count;
                     }
                 }, this.executionContext.getBatchSize());
             } else if (visitor.getOperationType() == OperationType.INSERT) {
-                InfinispanDocument previous = (InfinispanDocument)cache.get(visitor.getIdentity());
-                if (visitor.isNestedOperation()) {
-                    if (previous == null) {
-                        throw new TranslatorException(InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25009,
-                                table.getName(), visitor.getIdentity()));
-                    }
-                    String childName = ProtobufMetadataProcessor.getMessageName(visitor.getQueryTable());
-                    previous.addChildDocument(childName, visitor.getInsertPayload().getChildDocuments(childName).get(0));
-                } else {
-                    // this is always single row; putIfAbsent is not working correctly.
-                    if (previous != null) {
-                        throw new TranslatorException(InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25005,
-                                table.getName(), visitor.getIdentity()));
-                    }
-                    previous = visitor.getInsertPayload();
-                }
-                previous = (InfinispanDocument) cache.put(visitor.getIdentity(), previous);
-                this.updateCount++;
+            	performInsert(visitor, table, cache, false, marshaller);
             } else if (visitor.getOperationType() == OperationType.UPSERT) {
-                boolean replace = false;
-                // this is always single row; putIfAbsent is not working correctly.
-                InfinispanDocument previous = (InfinispanDocument)cache.get(visitor.getIdentity());
-                if (visitor.isNestedOperation()) {
-                    if (previous == null) {
-                        throw new TranslatorException(InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25009,
-                                table.getName(), visitor.getIdentity()));
-                    }
-                    String childName = ProtobufMetadataProcessor.getMessageName(visitor.getQueryTable());
-                    previous.addChildDocument(childName, visitor.getInsertPayload().getChildDocuments(childName).get(0));
-                    replace = true;
-                } else {
-                    if (previous != null) {
-                        mergeUpdatePayload(previous, visitor.getInsertPayload());
-                        replace = true;
-                    } else {
-                        previous = visitor.getInsertPayload();
-                    }
-                }
-                if (replace) {
-                    previous = (InfinispanDocument) cache.replace(visitor.getIdentity(), previous);
-                } else {
-                    previous = (InfinispanDocument) cache.put(visitor.getIdentity(), previous);
-                }
-                this.updateCount++;
+                performInsert(visitor, table, cache, true, marshaller);
             }
         } finally {
             if (marshaller != null) {
@@ -216,15 +180,211 @@ public class InfinispanUpdateExecution implements UpdateExecution {
         }
     }
 
+	@SuppressWarnings("unchecked")
+	private void performInsert(final InfinispanUpdateVisitor visitor, Table table,
+			final RemoteCache<Object, Object> cache, boolean upsert, TeiidTableMarsheller marshaller)
+			throws TranslatorException {
+		Insert insert = (Insert)this.command;
+		if (visitor.isNestedOperation()) {
+			InfinispanDocument previous = null;
+			if (visitor.getIdentity() != null) {
+				previous = (InfinispanDocument)cache.get(visitor.getIdentity());
+			}
+		    if (insert.getParameterValues() != null) {
+		        throw new TranslatorException(InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25017,
+		                table.getName(), visitor.getParentTable().getName()));		    	
+		    }
+		    if (previous == null) {
+		        throw new TranslatorException(InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25009,
+		                table.getName(), visitor.getIdentity()));
+		    }
+		    String childName = ProtobufMetadataProcessor.getMessageName(visitor.getQueryTable());
+		    previous.addChildDocument(childName, visitor.getInsertPayload().getChildDocuments(childName).get(0));
+		    if (upsert) {
+		    	previous = (InfinispanDocument) cache.replace(visitor.getIdentity(), previous);
+		    } else {
+		    	previous = (InfinispanDocument) cache.put(visitor.getIdentity(), previous);			
+		    }
+		    this.updateCount++;
+		} else {
+			if (insert.getParameterValues() == null) {  
+				insertRow(cache, visitor.getIdentity(), visitor.getInsertPayload(), upsert);
+				this.updateCount++;			    
+			} else {
+				
+				boolean putAll = false;
+				if (this.executionContext.getSourceHint() != null) {
+					putAll = this.executionContext.getSourceHint().indexOf("use-putall") != -1; 
+				}
+				
+				// bulk insert
+				int batchSize = this.executionContext.getBatchSize();
+				Iterator<? extends List<Expression>> args = (Iterator<? extends List<Expression>>) insert
+						.getParameterValues();
+				while(true) {
+					Map<Object, InfinispanDocument> rows = visitor.getBulkInsertPayload(insert, batchSize, args);
+					if (rows.isEmpty()) {
+						break;
+					}
+					if (putAll) {
+						BulkInsert bi = new UsePutAll(cache);
+						bi.run(rows, false);
+					} else {
+						BulkInsert bi = new OneAtATime(cache);
+						bi.run(rows, upsert);						
+					}
+					this.updateCount+=rows.size();			    					
+				}
+			}
+		}
+	}
+
+	private void insertRow(RemoteCache<Object, Object> cache, Object rowKey, InfinispanDocument row, boolean upsert)
+			throws TranslatorException {
+	    // this is always single row; putIfAbsent is not working correctly.
+		InfinispanDocument previous = (InfinispanDocument) cache.get(rowKey);
+		if (previous != null && !upsert) {
+			throw new TranslatorException(
+					InfinispanPlugin.Util.gs(InfinispanPlugin.Event.TEIID25005, previous.getName(), rowKey));
+		}
+		if (upsert && previous != null) {
+			previous.merge(row);
+			previous = (InfinispanDocument) cache.replace(rowKey, previous);
+		} else {
+			previous = row;
+			previous = (InfinispanDocument) cache.put(rowKey, previous);
+		}
+	}
+	
+	interface BulkInsert {
+		long run(Map<Object, InfinispanDocument> rows, boolean upsert) 
+				throws TranslatorException;
+	}
+	
     interface Task {
         void run(Object rows) throws TranslatorException;
     }
+    
+    /*
+	private class ExecutionBasedBulkInsert implements BulkInsert {
+		private TeiidTableMarsheller marshaller;
+		private InfinispanConnection connection;
+		
+		public ExecutionBasedBulkInsert(InfinispanConnection connection, TeiidTableMarsheller marshaller)
+				throws TranslatorException {
+			this.marshaller = marshaller;
+			this.connection = connection;
+		}
+		
+		@Override
+		public long run(Map<Object, InfinispanDocument> rows, boolean upsert) throws TranslatorException {
+			try {
+				HashMap<String, Object> parameters = new HashMap<>();				
+				parameters.put("upsert", String.valueOf(upsert));
+				parameters.put("row-count", rows.size());
+				int count = 0;
+				for (Map.Entry<Object, InfinispanDocument> document:rows.entrySet()) {
+					parameters.put("row-key-"+count, document.getKey());
+					
+					ByteArrayOutputStream out;
+					try {
+						out = new ByteArrayOutputStream(10*1024);
+						RawProtoStreamWriter writer = RawProtoStreamWriterImpl.newInstance(out);
+						this.marshaller.writeTo(null, writer, document.getValue());
+						writer.flush();
+						out.close();
+					} catch (IOException e) {
+						throw new TranslatorException(e);
+					}
+					parameters.put("row-"+count, out.toByteArray());
+					count++;
+				}
+				return this.connection.execute("teiid-bulk-insert", parameters);
+			} catch (RuntimeException e) {
+				throw new TranslatorException(e);
+			}
+		}
+	}
+	*/
+	
+	private class OneAtATime implements BulkInsert {
+		private RemoteCache<Object, Object> cache;
+		
+		public OneAtATime(RemoteCache<Object, Object> cache) {
+			this.cache = cache;
+		}
+		
+		@Override
+		public long run(Map<Object, InfinispanDocument> rows, boolean upsert) throws TranslatorException {
+			long updateCount = 0;
+			for (Map.Entry<Object, InfinispanDocument> row : rows.entrySet()) {
+				insertRow(this.cache, row.getKey(), row.getValue(), upsert);
+				updateCount++;			    
+			}
+			return updateCount;
+		}
+	}
+	
+	private class UsePutAll implements BulkInsert {
+		private RemoteCache<Object, Object> cache;
+		
+		public UsePutAll(RemoteCache<Object, Object> cache) {
+			this.cache = cache;
+		}
+		
+		@Override
+		public long run(Map<Object, InfinispanDocument> rows, boolean upsert) throws TranslatorException {
+			this.cache.putAll(rows);
+			return rows.size();
+		}
+	}
+	
+	/*
+	 * pagination for delete does not need to use the offset, because when a delete is done, the subsequent query does not include
+	 * the previously removed objects.
+	 */
+	   static void paginateDeleteResults(RemoteCache<Object, Object> cache, String queryStr, Task task, int batchSize)
+	            throws TranslatorException {
 
-    static void paginateResults(RemoteCache<Object, Object> cache, String queryStr, Task task, int batchSize)
+	    	if (cache.isEmpty()) return;
+	    	
+			QueryFactory qf = Search.getQueryFactory(cache);
+			Query query = qf.create(queryStr);
+
+			try {
+				int offset = 0;
+				while (true) {
+		
+					query.startOffset(offset);
+					query.maxResults(batchSize);
+		
+					int cnt = query.getResultSize();
+					List<Object> values = query.list();
+		
+					if (values == null || values.isEmpty()) {
+						break;
+					}
+					for (Object doc : values) {
+						task.run(doc);
+					}		
+
+				}
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+
+	    }
+	
+		/*
+		 * pagination for update options does use the offset, because the query returns the same set of objects, so the
+		 * offset has to be used to position the next group of objects to be updated 
+		 */
+
+    static void paginateUpdateResults(RemoteCache<Object, Object> cache, String queryStr, Task task, int batchSize)
             throws TranslatorException {
-
-        QueryFactory qf = Search.getQueryFactory(cache);
-        Query query = qf.create(queryStr);
+    	
+		QueryFactory qf = Search.getQueryFactory(cache);
+		Query query = qf.create(queryStr);
 
         int offset = 0;
         query.startOffset(0);
@@ -241,43 +401,8 @@ public class InfinispanUpdateExecution implements UpdateExecution {
             query.startOffset(offset);
             values = query.list();
         }
-    }
 
-    private int mergeUpdatePayload(InfinispanDocument previous,
-            InfinispanDocument updates) {
-        int updated = 1;
-        for (Entry<String, Object> entry:updates.getProperties().entrySet()) {
-            previous.addProperty(entry.getKey(), entry.getValue());
-        }
-
-        // update children if any
-        for (Entry<String, List<Document>> entry:updates.getChildren().entrySet()) {
-            String childName = entry.getKey();
-
-            List<? extends Document> childUpdates = updates.getChildDocuments(childName);
-            InfinispanDocument childUpdate = (InfinispanDocument)childUpdates.get(0);
-            if (childUpdate.getProperties().isEmpty()) {
-                continue;
-            }
-
-            List<? extends Document> previousChildren = previous.getChildDocuments(childName);
-            if (previousChildren == null || previousChildren.isEmpty()) {
-                previous.addChildDocument(childName, childUpdate);
-            } else {
-                for (Document doc : previousChildren) {
-                    InfinispanDocument previousChild = (InfinispanDocument)doc;
-                    if (previousChild.isMatched()) {
-                        for (Entry<String, Object> childEntry:childUpdate.getProperties().entrySet()) {
-                            String key = childEntry.getKey().substring(childEntry.getKey().lastIndexOf('/')+1);
-                            previousChild.addProperty(key, childEntry.getValue());
-                            updated++;
-                        }
-                    }
-                }
-            }
-        }
-        return updated;
-    }
+}
 
     @Override
     public int[] getUpdateCounts() throws DataNotAvailableException, TranslatorException {

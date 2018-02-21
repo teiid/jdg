@@ -4,7 +4,7 @@ package pm1;
 message G1 {
    /*
      @Id
-     @IndexedField(index=true, store=false)       
+     @IndexedField(index=true, store=false) @Cache(name=personCache)     
     */
    required int32 e1 = 1;
    

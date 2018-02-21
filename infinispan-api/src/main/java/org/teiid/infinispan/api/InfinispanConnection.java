@@ -21,6 +21,8 @@
  */
 package org.teiid.infinispan.api;
 
+import java.util.Map;
+
 import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.api.BasicCacheContainer;
 import org.infinispan.protostream.BaseMarshaller;
@@ -37,4 +39,8 @@ public interface InfinispanConnection {
     void registerMarshaller(BaseMarshaller<InfinispanDocument> marshller) throws TranslatorException;
 
     void unRegisterMarshaller(BaseMarshaller<InfinispanDocument> marshller) throws TranslatorException;
+
+    void registerScript(String scriptName, String script);
+    
+    <T> T execute(String scriptName, Map<String, ?> params);
 }
