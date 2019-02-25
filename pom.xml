@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 	<name>Teiid JDG Connectors</name>
 
-	<version>8.12.15.6_4</version>
+	<version>8.12.17.6_4</version>
 	<description>JDG translator and connectors</description>
 	<properties>
 		<version.bundle.plugin>3.0.1</version.bundle.plugin>
@@ -24,7 +24,7 @@
 		<version.org.jboss.as>7.5.17.Final-redhat-4</version.org.jboss.as>
 
 		<version.org.jboss.integration-platform>6.0.0.CR30</version.org.jboss.integration-platform>
-		<version.teiid>8.12.15.6_4</version.teiid>
+		<version.teiid>8.12.17.6_4</version.teiid>
 
 		<version.org.hibernate.core>5.0.1.Final-redhat-2</version.org.hibernate.core> <!-- 5.5.1.Final -->
 		<version.org.infinispan.hibernate.search>5.6.0.Final-redhat-1</version.org.infinispan.hibernate.search>
@@ -36,12 +36,12 @@
  -->
 
 		<!-- JDG module slot to use -->
-		<jdg.slot>jdg-7.2</jdg.slot>
-		<version.org.infinispan.ds>8.5.0.Final-redhat-9</version.org.infinispan.ds> <!--  8.4.0.Final-redhat-2 -->
-		<version.org.apache.lucene.infinispan>5.5.0</version.org.apache.lucene.infinispan>	<!-- 5.5.0 -->
+		<jdg.slot>jdg-7.3</jdg.slot>
+		<version.org.infinispan.ds>9.4.6.Final-redhat-00002</version.org.infinispan.ds> <!--  8.4.0.Final-redhat-2 -->
+		<version.org.apache.lucene.infinispan>5.5.5</version.org.apache.lucene.infinispan>	<!-- 5.5.0 -->
 		<version.com.squareup.protoparser>4.0.3</version.com.squareup.protoparser>
 		<!-- version.com.squareup.protoparser>3.1.5</version.com.squareup.protoparser-->
-		<version.org.infinispan.protostream>4.2.0.CR2-redhat-1</version.org.infinispan.protostream>
+		<version.org.infinispan.protostream>4.2.2.Final</version.org.infinispan.protostream>
 
 	</properties>
 
